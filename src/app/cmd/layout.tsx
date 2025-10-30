@@ -1,5 +1,5 @@
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Shield, Home, KeyRound, Menu, User, Settings } from "lucide-react";
+import { Shield, Home, KeyRound, Menu, User, Settings, Plug } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
 
@@ -27,6 +27,11 @@ export default function CmdLayout({
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Access Control">
                 <Link href="/cmd/access"><KeyRound /><span>Access Control</span></Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Integrations">
+                <Link href="/cmd/integrations"><Plug /><span>Integrations</span></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
              <SidebarMenuItem>
