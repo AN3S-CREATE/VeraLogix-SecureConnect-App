@@ -94,11 +94,11 @@
 }
 
 @layer components {
-  /* Focus rings (visible, AA-friendly) */
+  /* Focus rings (visible, AA) */
   .vx-focus:focus-visible {
     outline:2px solid var(--neon-1);
     outline-offset:2px;
-    box-shadow:0 0 0 3px color-mix(in oklab,var(--neon-1) 35%, transparent)
+    box-shadow:0 0 0 3px color-mix(in lch,var(--neon-1) 35%, transparent)
   }
   
   /* Cards */
@@ -106,10 +106,10 @@
     background:linear-gradient(180deg,rgba(168,207,69,.08),rgba(69,92,8,.04)),var(--black);
     border:1px solid rgba(168,207,69,.25);
     border-radius:20px;
-    box-shadow:0 0 0 1px color-mix(in oklab,var(--neon-2) 18%, transparent) inset,0 10px 30px rgba(0,0,0,.35)
+    box-shadow:0 0 0 1px color-mix(in lch,var(--neon-2) 18%, transparent) inset,0 10px 30px rgba(0,0,0,.35)
   }
   .vx-card:hover{
-    box-shadow:0 0 24px color-mix(in oklab,var(--neon-1) 45%, transparent),0 0 6px color-mix(in oklab,var(--neon-2) 35%, transparent) inset
+    box-shadow:0 0 24px color-mix(in lch,var(--neon-1) 45%, transparent),0 0 6px color-mix(in lch,var(--neon-2) 35%, transparent) inset
   }
   
   /* Primary CTA */
@@ -135,14 +135,19 @@
   
   /* Chips */
   .chip-info{
-    background:color-mix(in oklab,var(--neon-2) 20%, transparent);
-    border:1px solid color-mix(in oklab,var(--neon-2) 45%, transparent);
+    background:color-mix(in lch,var(--neon-2) 20%, transparent);
+    border:1px solid color-mix(in lch,var(--neon-2) 45%, transparent);
     color:#203000;
   }
   .chip-alert{
-    background:color-mix(in oklab,var(--neon-3) 22%, transparent);
-    border:1px solid color-mix(in oklab,var(--neon-3) 50%, transparent);
+    background:color-mix(in lch,var(--neon-3) 22%, transparent);
+    border:1px solid color-mix(in lch,var(--neon-3) 50%, transparent);
     color:#172000;
+  }
+  /* Spinner + Dust */
+  .vx-spinner{
+    border-top-color:var(--neon-1);
+    filter:drop-shadow(0 0 8px color-mix(in lch,var(--neon-1) 55%, transparent))
   }
 
   /* KPI Card specifics */
