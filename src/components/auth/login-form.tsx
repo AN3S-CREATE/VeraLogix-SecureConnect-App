@@ -18,8 +18,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const formSchema = z.object({
+  profile: z.enum(["Agent", "Resident", "Trustee", "Vendor", "Estate Manager"]),
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
@@ -36,6 +38,7 @@ export function LoginForm() {
       email: "",
       password: "",
       remember: false,
+      profile: "Agent",
     },
   });
 
@@ -58,6 +61,30 @@ export function LoginForm() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="profile"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Profile</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a profile to log in" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Agent">Agent</SelectItem>
+                    <SelectItem value="Resident">Resident</SelectItem>
+                    <SelectItem value="Trustee">Trustee</SelectItem>
+                    <SelectItem value="Vendor">Vendor</SelectItem>
+                    <SelectItem value="Estate Manager">Estate Manager</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="email"
