@@ -1,10 +1,14 @@
+
 "use client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { FilePlus2, Filter, User } from "lucide-react";
+import { FilePlus2, Filter, Download } from "lucide-react";
 
 export default function IncidentsPage() {
 
@@ -107,7 +111,46 @@ export default function IncidentsPage() {
                 <div className="flex-1"></div>
 
                 <div className="space-y-2">
-                    <Button className="w-full vx-cta vx-focus">Resolve Incident</Button>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button className="w-full vx-cta vx-focus">Resolve Incident</Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-lg bg-background border-white/10">
+                            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[var(--neon-2)] to-transparent"></div>
+                            <DialogHeader>
+                                <DialogTitle>Resolve Incident: {selectedIncident.id}</DialogTitle>
+                                <DialogDescription>
+                                    Verify evidence, select an outcome, and add final notes to resolve this incident.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 my-4">
+                                <div>
+                                    <Label htmlFor="outcome">Resolution Outcome</Label>
+                                    <Select>
+                                        <SelectTrigger id="outcome" className="w-full vx-focus">
+                                            <SelectValue placeholder="Select an outcome" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="resolved">Resolved</SelectItem>
+                                            <SelectItem value="false_alarm">False Alarm</SelectItem>
+                                            <SelectItem value="escalated_externally">Escalated Externally</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div>
+                                    <Label htmlFor="resolution-notes">Final Notes</Label>
+                                    <Textarea id="resolution-notes" placeholder="Add your closing remarks..." className="vx-focus" />
+                                </div>
+                            </div>
+                            <DialogFooter className="sm:justify-between">
+                                <Button variant="outline" className="vx-focus"><Download className="mr-2" /> Export Report</Button>
+                                <div>
+                                    <Button variant="secondary">Cancel</Button>
+                                    <Button className="vx-cta vx-focus ml-2">Confirm Resolution</Button>
+                                </div>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                     <Button variant="destructive" className="w-full vx-focus">Escalate</Button>
                 </div>
             </aside>
