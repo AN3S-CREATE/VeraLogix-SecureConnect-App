@@ -24,15 +24,19 @@ export default function TenEvPage() {
             <Button variant="destructive" className="vx-focus">Stop Charging</Button>
         </div>
         <div className="mt-4 relative flex items-center justify-center w-48 h-48 mx-auto">
-            <div className="absolute inset-0 rounded-full bg-muted"></div>
-            <div className="absolute inset-2 rounded-full bg-background"></div>
-            <div 
-                className="absolute inset-0 rounded-full border-4 border-primary"
-                style={{
-                    boxShadow: '0 0 15px var(--neon-1)',
-                    clipPath: 'polygon(0% 0%, 100% 0%, 100% 75%, 0% 75%)' // Example for 75% charged
-                }}
-            ></div>
+            <svg className="absolute inset-0" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" className="stroke-muted" strokeWidth="5" fill="transparent" />
+                <circle 
+                    cx="50" cy="50" r="45" 
+                    className="stroke-primary" strokeWidth="5" fill="transparent"
+                    strokeDasharray="282.74" // 2 * PI * 45
+                    strokeDashoffset="70.685" // 282.74 * (1 - 0.75)
+                    transform="rotate(-90 50 50)"
+                    style={{
+                        filter: 'drop-shadow(0 0 5px var(--neon-1))'
+                    }}
+                />
+            </svg>
             <div className="z-10 text-center">
                 <p className="text-4xl font-bold text-gradient-primary">75%</p>
                 <p className="text-sm text-muted-foreground">12.5 kWh delivered</p>
@@ -47,7 +51,7 @@ export default function TenEvPage() {
             <div key={bay.id} className={`vx-card p-4 text-center space-y-2 ${bay.status !== 'available' ? 'opacity-50' : ''}`}>
               <Zap className={`mx-auto h-8 w-8 ${bay.status === 'charging' ? 'text-primary animate-pulse' : 'text-muted-foreground'}`} />
               <p className="font-semibold">Bay {bay.id}</p>
-              <p className={`text-sm capitalize ${bay.status === 'available' ? 'text-primary' : 'text-muted-foreground'}`}>{bay.status}</p>
+              <p className={`text-sm capitalize ${bay.status === 'available' ? 'delta-positive' : 'text-muted-foreground'}`}>{bay.status}</p>
               <Button size="sm" className="w-full vx-cta vx-focus" disabled={bay.status !== 'available'}>Reserve</Button>
             </div>
           ))}

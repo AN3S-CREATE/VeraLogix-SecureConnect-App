@@ -85,7 +85,7 @@ export default function TenKeysPage() {
              <div 
               className="absolute inset-0 border-2 border-neon-1 rounded-[20px] pointer-events-none"
               style={{
-                animation: 'pulse-glow 4s infinite ease-in-out'
+                animation: 'pulse-glow 2s infinite ease-in-out'
               }}
              ></div>
             <style jsx>{`

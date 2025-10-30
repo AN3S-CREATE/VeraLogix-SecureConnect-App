@@ -22,7 +22,7 @@ export default function TenAmenitiesPage() {
             <SheetTrigger asChild>
               <div className="vx-card p-0 overflow-hidden cursor-pointer">
                 <div className="relative h-48 w-full">
-                  <Image src={amenity.image} alt={amenity.name} layout="fill" objectFit="cover" data-ai-hint={amenity.hint} />
+                  <Image src={amenity.image} alt={amenity.name} fill objectFit="cover" data-ai-hint={amenity.hint} />
                   {!amenity.available && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><span className="chip-alert">Fully Booked</span></div>}
                 </div>
                 <div className="p-4">
@@ -49,7 +49,7 @@ export default function TenAmenitiesPage() {
                     <h3 className="font-semibold mb-2">Available Slots</h3>
                     <div className="grid grid-cols-3 gap-2">
                         <Button variant="outline" className="vx-focus">09:00</Button>
-                        <Button variant="outline" className="vx-focus ring-neon-1 ring-2">11:00</Button>
+                        <Button variant="outline" className="vx-focus ring-2 ring-neon-1">11:00</Button>
                         <Button variant="outline" className="vx-focus">13:00</Button>
                         <Button variant="outline" className="vx-focus" disabled>15:00</Button>
                         <Button variant="outline" className="vx-focus">17:00</Button>

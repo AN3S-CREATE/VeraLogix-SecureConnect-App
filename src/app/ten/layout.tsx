@@ -1,5 +1,5 @@
 import { SidebarProvider, Sidebar, SidebarInset, SidebarHeader, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { Home, KeyRound, Ticket, Building, CreditCard, MessageSquare, Car, Menu } from "lucide-react";
+import { Home, KeyRound, Ticket, Building, CreditCard, MessageSquare, Car, Menu, Wrench } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
 
@@ -20,7 +20,7 @@ export default function TenLayout({
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={true} tooltip="Home">
+              <SidebarMenuButton asChild tooltip="Home">
                 <Link href="/ten/home"><Home /><span>Home</span></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -46,7 +46,7 @@ export default function TenLayout({
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Maintenance">
-                <Link href="/ten/maintenance"><Building /><span>Maintenance</span></Link>
+                <Link href="/ten/maintenance"><Wrench /><span>Maintenance</span></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>

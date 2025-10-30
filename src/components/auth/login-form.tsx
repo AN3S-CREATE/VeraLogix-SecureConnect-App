@@ -19,6 +19,8 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   profile: z.enum(["Agent", "Resident", "Trustee", "Vendor", "Estate Manager"]),
@@ -31,28 +33,43 @@ const formSchema = z.object({
   remember: z.boolean().default(false).optional(),
 });
 
+const profileRoutes: Record<string, string> = {
+    "Agent": "/cmd",
+    "Resident": "/ten/home",
+    "Trustee": "/tru/overview",
+    "Vendor": "/ven/dashboard",
+    "Estate Manager": "/cmd"
+};
+
 export function LoginForm() {
+  const router = useRouter();
+  const { toast } = useToast();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       password: "",
       remember: false,
-      profile: "Agent",
+      profile: "Resident",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // This is a placeholder for the login logic.
-    // In a real application, you would make an API call here.
     console.log(values);
+    toast({
+        title: "Login Successful",
+        description: `Redirecting to ${values.profile} dashboard...`,
+    })
+    const route = profileRoutes[values.profile] || "/";
+    router.push(route);
   }
 
   return (
     <div className="w-full max-w-sm space-y-6 p-8 vx-card">
       <div className="text-center">
         <h1 className="text-3xl font-bold tracking-tight font-headline text-foreground">
-          Agent Console
+          SecureConnect™
         </h1>
         <p className="mt-2 text-muted-foreground">
           Securely sign in to your Veralogix account.
@@ -92,7 +109,7 @@ export function LoginForm() {
               <FormItem>
                 <FormLabel>Email Address</FormLabel>
                 <FormControl>
-                  <Input placeholder="agent@veralogix.com" {...field} className="vx-focus" />
+                  <Input placeholder="user@veralogix.com" {...field} className="vx-focus" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -139,7 +156,7 @@ export function LoginForm() {
                 Forgot password?
               </Link>
           </div>
-          <Button type="submit" className={cn("w-full transition-all vx-cta", "hover:shadow-[0_0_15px_theme(colors.primary.DEFAULT)]")}>
+          <Button type="submit" className={cn("w-full transition-all vx-cta vx-focus", "hover:shadow-[0_0_15px_theme(colors.primary.DEFAULT)]")}>
             <KeyRound className="mr-2 h-4 w-4" />
             Sign In
           </Button>

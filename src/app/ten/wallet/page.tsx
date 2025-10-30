@@ -60,7 +60,7 @@ export default function TenWalletPage() {
                   <tr key={item.id} className="vx-table-row border-t border-white/10">
                     <td className="p-4 text-muted-foreground">{item.date}</td>
                     <td className="p-4">{item.type}</td>
-                    <td className={`p-4 text-right font-medium ${item.amount > 0 ? 'text-green-400' : 'text-foreground'}`}>
+                    <td className={`p-4 text-right font-medium ${item.amount > 0 ? 'delta-positive' : 'text-foreground'}`}>
                       {item.amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                     </td>
                   </tr>
