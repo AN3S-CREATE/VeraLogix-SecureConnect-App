@@ -31,7 +31,7 @@ export default function TruLayout({
             </SidebarMenuItem>
              <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Financials">
-                <Link href="#"><LineChart /><span>Financials</span></Link>
+                <Link href="/tru/financials"><LineChart /><span>Financials</span></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
