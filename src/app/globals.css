@@ -109,7 +109,7 @@
     box-shadow:0 0 0 1px color-mix(in lch,var(--neon-2) 18%, transparent) inset,0 10px 30px rgba(0,0,0,.35)
   }
   .vx-card:hover{
-    box-shadow:0 0 24px color-mix(in lch,var(--neon-1) 45%, transparent),0 0 6px color-mix(in lch,var(--neon-2) 35%, transparent) inset
+    box-shadow:0 0 24px rgba(182,255,46,.45),0 0 6px color-mix(in lch,var(--neon-2) 35%, transparent) inset
   }
   
   /* Primary CTA */
