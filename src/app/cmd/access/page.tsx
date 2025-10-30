@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { UserPlus, ShieldAlert } from "lucide-react";
+import { UserPlus, ShieldAlert, Timer } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function AccessControlPage() {
   const doors = [
@@ -63,10 +64,10 @@ export default function AccessControlPage() {
                 <DialogTrigger asChild>
                     <Button variant="outline" className="w-full border-destructive/50 text-destructive-foreground hover:bg-destructive/20 hover:text-destructive-foreground vx-focus"><ShieldAlert className="mr-2" /> Request Override</Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md bg-background border-white/10">
+                <DialogContent className="sm:max-w-md bg-background border-[var(--neon-3)]/50" style={{boxShadow: '0 0 40px rgba(212,255,0,.35)'}}>
                     <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[var(--neon-3)] to-transparent"></div>
                     <DialogHeader>
-                        <DialogTitle>Policy Override Request</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2"><ShieldAlert className="text-[var(--neon-3)]" />Policy Override Request</DialogTitle>
                         <DialogDescription>
                             Requesting a temporary override requires multi-factor authentication and is fully audited.
                         </DialogDescription>
@@ -75,6 +76,13 @@ export default function AccessControlPage() {
                          <div>
                             <Label htmlFor="override-reason">Reason for Override</Label>
                             <Input id="override-reason" placeholder="e.g., Emergency maintenance access" className="vx-focus" />
+                        </div>
+                        <div>
+                            <Label htmlFor="override-duration">Duration (minutes)</Label>
+                            <div className="relative">
+                                <Timer className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input id="override-duration" type="number" placeholder="30" className="vx-focus pl-8" />
+                            </div>
                         </div>
                         <div>
                             <Label htmlFor="mfa-code">Authentication Code</Label>
