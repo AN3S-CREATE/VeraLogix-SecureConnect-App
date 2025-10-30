@@ -1,5 +1,5 @@
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { ShieldCheck, Building, Menu, LineChart, DollarSign, Zap } from "lucide-react";
+import { ShieldCheck, Building, Menu, LineChart, DollarSign, Zap, ClipboardList } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
 
@@ -32,6 +32,11 @@ export default function TruLayout({
              <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Financials">
                 <Link href="/tru/financials"><LineChart /><span>Financials</span></Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Collections">
+                <Link href="/tru/collections"><ClipboardList /><span>Collections</span></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
