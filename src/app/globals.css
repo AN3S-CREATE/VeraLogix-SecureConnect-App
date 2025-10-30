@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -94,7 +95,7 @@
 
 @layer components {
   /* Focus rings (visible, AA-friendly) */
-  .vx-focus:focus{
+  .vx-focus:focus-visible {
     outline:2px solid var(--neon-1);
     outline-offset:2px;
     box-shadow:0 0 0 3px color-mix(in oklab,var(--neon-1) 35%, transparent)
@@ -118,21 +119,55 @@
     font-weight:700;
     border-radius:12px;padding:.875rem 1.25rem
   }
-  .vx-cta:focus{
+  .vx-cta:focus-visible{
     outline: none;
-    box-shadow: 0 0 0 3px color-mix(in oklab, hsl(var(--accent)) 85%, transparent),
-      0 0 40px rgba(212,255,0,.35);
+    box-shadow: 0 0 0 2px var(--neon-1),
+                0 0 0 5px color-mix(in oklab, var(--neon-1) 35%, transparent),
+                0 0 40px rgba(212,255,0,.35);
+  }
+  .vx-cta:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .vx-cta:disabled:hover, .vx-cta:disabled:focus-visible {
+    box-shadow: none;
   }
   
   /* Chips */
   .chip-info{
     background:color-mix(in oklab,var(--neon-2) 20%, transparent);
     border:1px solid color-mix(in oklab,var(--neon-2) 45%, transparent);
-    color:#203000
+    color:#203000;
   }
   .chip-alert{
     background:color-mix(in oklab,var(--neon-3) 22%, transparent);
     border:1px solid color-mix(in oklab,var(--neon-3) 50%, transparent);
-    color:#172000
+    color:#172000;
+  }
+
+  /* KPI Card specifics */
+  .text-gradient-primary {
+    background: linear-gradient(var(--g1), var(--g3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .delta-positive {
+    color: var(--g1);
+  }
+  .delta-negative {
+    color: var(--neon-3);
+  }
+
+  /* Data Table */
+  .vx-table-row:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+  .vx-table-row[data-state=selected] {
+    box-shadow: inset 3px 0 0 0 var(--neon-1);
+  }
+  
+  /* Tabs */
+  .vx-tabs-trigger[data-state=active] {
+    box-shadow: 0 2px 0 0 var(--neon-1), 0 3px 8px color-mix(in oklab, var(--neon-1) 25%, transparent);
   }
 }
