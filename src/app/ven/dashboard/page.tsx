@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { CalendarPlus, CheckCircle, Clock, Plus, QrCode, Share2, UserPlus, XCircle } from "lucide-react";
+import Link from "next/link";
 
 export default function VenDashboardPage() {
 
@@ -57,6 +58,14 @@ export default function VenDashboardPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+        </div>
+
+        <div className="p-4 rounded-lg border border-border bg-card">
+            <p className="font-semibold">Your safety induction is pending.</p>
+            <p className="text-sm text-muted-foreground">Complete your induction to be able to request permits to work.</p>
+            <Button asChild size="sm" className="mt-2 vx-cta vx-focus">
+                <Link href="/ven/safety">Start Induction</Link>
+            </Button>
         </div>
         
         <div className="space-y-4">
