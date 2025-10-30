@@ -1,5 +1,5 @@
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { HardHat, LayoutDashboard, Menu, Wrench } from "lucide-react";
+import { HardHat, LayoutDashboard, Menu, Wrench, ReceiptText } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
 
@@ -32,6 +32,11 @@ export default function VenLayout({
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Safety & Permits">
                 <Link href="/ven/safety"><HardHat /><span>Safety & Permits</span></Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Invoicing">
+                <Link href="/ven/invoices"><ReceiptText /><span>Invoicing</span></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
