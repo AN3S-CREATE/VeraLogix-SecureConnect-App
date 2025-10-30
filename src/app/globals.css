@@ -37,6 +37,13 @@
     --sidebar-accent-foreground: 80 100% 10%;
     --sidebar-border: 330 3% 25%;
     --sidebar-ring: 80 100% 59%;
+
+    /* Added gradient and neon variables */
+    --g1: hsl(var(--primary));
+    --g2: hsl(var(--accent));
+    --g3: hsl(var(--secondary));
+    --neon-1: hsl(var(--accent));
+    --1neon-1: hsl(var(--accent));
   }
   .dark {
     --background: 330 3% 15%;
@@ -80,5 +87,19 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .vx-cta{
+    background:linear-gradient(90deg,var(--g1),var(--g2),var(--g3));
+    color:#1a1a1a;
+    font-weight:700;
+    border-radius:12px;
+    padding:.875rem 1.25rem
+  }
+  .vx-cta:focus{
+    outline:none;
+    box-shadow:0 0 0 3px color-mix(in oklab, var(--1neon-1) 85%, transparent),0 0 24px color-mix(in oklab, var(--neon-1) 55%, transparent)
   }
 }

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -110,7 +111,7 @@ export function LoginForm() {
                 Forgot password?
               </Link>
           </div>
-          <Button type="submit" className="w-full font-semibold transition-all hover:shadow-[0_0_15px_theme(colors.primary.DEFAULT)]">
+          <Button type="submit" className={cn("w-full transition-all vx-cta", "hover:shadow-[0_0_15px_theme(colors.primary.DEFAULT)]")}>
             <KeyRound className="mr-2 h-4 w-4" />
             Sign In
           </Button>
