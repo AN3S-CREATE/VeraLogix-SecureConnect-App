@@ -1,119 +1,182 @@
 {
   "entities": {
-    "Theme": {
+    "User": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Theme",
+      "title": "User",
       "type": "object",
-      "description": "Represents a theme for the Veralogix SecureConnect application.",
+      "description": "Represents a user account in the system.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the theme."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the theme (e.g., 'Default', 'Dark')."
-        },
-        "background": {
-          "type": "string",
-          "description": "Background color of the theme, in hex format (e.g., '#373435')."
-        },
-        "primaryGradientStart": {
-          "type": "string",
-          "description": "Starting color of the primary gradient, in hex format."
-        },
-        "primaryGradientEnd": {
-          "type": "string",
-          "description": "Ending color of the primary gradient, in hex format."
-        },
-        "neonAccent1": {
-          "type": "string",
-          "description": "First neon accent color, in hex format."
-        },
-        "neonAccent2": {
-          "type": "string",
-          "description": "Second neon accent color, in hex format."
-        },
-        "neonAccent3": {
-          "type": "string",
-          "description": "Third neon accent color, in hex format."
-        },
-        "focusStyle": {
-          "type": "string",
-          "description": "CSS style for focus state, including color and shadow (e.g., '2px #B6FF2E with extra 3px shadow')."
-        }
+        "id": { "type": "string", "description": "Unique identifier for the user." },
+        "role": { "type": "string", "description": "User's role (e.g., 'resident', 'agent')." },
+        "name": { "type": "string", "description": "Full name of the user." },
+        "email": { "type": "string", "format": "email", "description": "User's email address." },
+        "unitId": { "type": "string", "description": "Associated unit ID, optional." }
       },
-      "required": [
-        "id",
-        "name",
-        "background",
-        "primaryGradientStart",
-        "primaryGradientEnd",
-        "neonAccent1",
-        "neonAccent2",
-        "neonAccent3",
-        "focusStyle"
-      ]
+      "required": ["id", "role", "name", "email"]
     },
-    "Template": {
+    "Unit": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Template",
+      "title": "Unit",
       "type": "object",
-      "description": "Represents a UI template (e.g., Card, ListPage).",
+      "description": "Represents a physical unit within a site.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the template."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the template (e.g., 'Card', 'KPI Card', 'ListPage')."
-        },
-        "type": {
-          "type": "string",
-          "description": "Type of the template (e.g., 'Card', 'Page', 'Modal')."
-        },
-        "content": {
-          "type": "string",
-          "description": "The content or structure of the template, likely in a markup language (e.g., JSX, HTML)."
-        },
-        "themeId": {
-          "type": "string",
-          "description": "Reference to Theme. (Relationship: Theme 1:N Template)"
-        }
+        "id": { "type": "string", "description": "Unique identifier for the unit." },
+        "label": { "type": "string", "description": "Display label for the unit (e.g., 'Apt 101')." },
+        "siteId": { "type": "string", "description": "Identifier for the site this unit belongs to." }
       },
-      "required": [
-        "id",
-        "name",
-        "type",
-        "content",
-        "themeId"
-      ]
+      "required": ["id", "label", "siteId"]
     },
-    "Role": {
+    "Pass": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Role",
+      "title": "Pass",
       "type": "object",
-      "description": "Represents a user role within the Veralogix SecureConnect application.",
+      "description": "Represents a visitor pass for accessing specific areas.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the role."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the role (e.g., 'resident', 'agent', 'trustee', 'vendor')."
-        },
-        "permissionPrefix": {
-          "type": "string",
-          "description": "Prefix used for permissions associated with this role (e.g., 'TEN', 'CMD', 'TRU', 'VEN')."
-        }
+        "id": { "type": "string", "description": "Unique identifier for the pass." },
+        "code": { "type": "string", "description": "The unique code for the pass (e.g., QR content)." },
+        "areas": { "type": "array", "items": { "type": "string" }, "description": "Array of area IDs this pass grants access to." },
+        "start": { "type": "string", "format": "date-time", "description": "Start validity time." },
+        "end": { "type": "string", "format": "date-time", "description": "End validity time." },
+        "status": { "type": "string", "description": "Status of the pass (e.g., 'active', 'expired')." },
+        "unitId": { "type": "string", "description": "The unit that generated this pass." }
       },
-      "required": [
-        "id",
-        "name",
-        "permissionPrefix"
-      ]
+      "required": ["id", "code", "areas", "start", "end", "status", "unitId"]
+    },
+    "Booking": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Booking",
+      "type": "object",
+      "description": "Represents a booking for an amenity.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the booking." },
+        "amenityId": { "type": "string", "description": "Reference to the booked amenity." },
+        "slotStart": { "type": "string", "format": "date-time", "description": "Booking start time." },
+        "slotEnd": { "type": "string", "format": "date-time", "description": "Booking end time." },
+        "price": { "type": "number", "description": "Total price of the booking." },
+        "status": { "type": "string", "description": "Status of the booking (e.g., 'confirmed', 'cancelled')." },
+        "userId": { "type": "string", "description": "The user who made the booking." }
+      },
+      "required": ["id", "amenityId", "slotStart", "slotEnd", "price", "status", "userId"]
+    },
+    "Amenity": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Amenity",
+      "type": "object",
+      "description": "Represents a bookable amenity.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the amenity." },
+        "name": { "type": "string", "description": "Name of the amenity." },
+        "rules": { "type": "string", "description": "Usage rules and policies." },
+        "priceRuleId": { "type": "string", "description": "Reference to a pricing rule." },
+        "photos": { "type": "array", "items": { "type": "string", "format": "uri" }, "description": "URLs of amenity photos." }
+      },
+      "required": ["id", "name", "rules", "priceRuleId", "photos"]
+    },
+    "Invoice": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Invoice",
+      "type": "object",
+      "description": "Represents a financial invoice for a user.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the invoice." },
+        "userId": { "type": "string", "description": "The user associated with the invoice." },
+        "amount": { "type": "number", "description": "Total amount due." },
+        "due": { "type": "string", "format": "date-time", "description": "Due date for the payment." },
+        "status": { "type": "string", "description": "Status of the invoice (e.g., 'paid', 'unpaid')." },
+        "ledger": { "type": "array", "items": { "type": "string" }, "description": "Array of transaction IDs related to this invoice." }
+      },
+      "required": ["id", "userId", "amount", "due", "status", "ledger"]
+    },
+    "Ticket": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Ticket",
+      "type": "object",
+      "description": "Represents a maintenance or support ticket.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the ticket." },
+        "unitId": { "type": "string", "description": "The unit associated with the ticket." },
+        "category": { "type": "string", "description": "Category of the issue." },
+        "desc": { "type": "string", "description": "Detailed description of the issue." },
+        "media": { "type": "array", "items": { "type": "string" }, "description": "Attached media file identifiers." },
+        "status": { "type": "string", "description": "Current status of the ticket." },
+        "slaDeadline": { "type": "string", "format": "date-time", "description": "SLA deadline for resolution." },
+        "timeline": { "type": "array", "items": { "type": "string" }, "description": "Timeline of events for the ticket." }
+      },
+      "required": ["id", "unitId", "category", "desc", "status", "slaDeadline", "timeline"]
+    },
+    "Door": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Door",
+      "type": "object",
+      "description": "Represents a door with access control.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the door." },
+        "name": { "type": "string", "description": "Name of the door." },
+        "state": { "type": "string", "description": "Current state (e.g., 'locked', 'unlocked')." },
+        "proximityReady": { "type": "boolean", "description": "Indicates if proximity open is available." },
+        "siteId": { "type": "string", "description": "The site this door belongs to." }
+      },
+      "required": ["id", "name", "state", "proximityReady", "siteId"]
+    },
+    "AccessLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AccessLog",
+      "type": "object",
+      "description": "Represents a log of an access attempt.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the log entry." },
+        "ts": { "type": "string", "format": "date-time", "description": "Timestamp of the access attempt." },
+        "doorId": { "type": "string", "description": "Identifier of the door that was accessed." },
+        "result": { "type": "string", "description": "Result of the access attempt (e.g., 'granted', 'denied')." }
+      },
+      "required": ["id", "ts", "doorId", "result"]
+    },
+    "Incident": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Incident",
+      "type": "object",
+      "description": "Represents a security or operational incident.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the incident." },
+        "severity": { "type": "string", "description": "Severity of the incident." },
+        "status": { "type": "string", "description": "Current status of the incident." },
+        "slaDeadline": { "type": "string", "format": "date-time", "description": "SLA for incident resolution." },
+        "evidence": { "type": "array", "items": { "type": "string" }, "description": "Array of evidence file identifiers." },
+        "relatedIds": { "type": "array", "items": { "type": "string" }, "description": "IDs of related entities." }
+      },
+      "required": ["id", "severity", "status", "slaDeadline", "evidence"]
+    },
+    "Energy": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Energy",
+      "type": "object",
+      "description": "Represents energy consumption data.",
+      "properties": {
+        "siteId": { "type": "string", "description": "The site this data belongs to." },
+        "ts": { "type": "string", "format": "date-time", "description": "Timestamp of the data point." },
+        "kwh": { "type": "number", "description": "Energy consumption in kWh." },
+        "waterL": { "type": "number", "description": "Water consumption in liters." },
+        "iaqIndex": { "type": "number", "description": "Indoor Air Quality Index." },
+        "zone": { "type": "string", "description": "Specific zone within the site." }
+      },
+      "required": ["siteId", "ts", "kwh", "waterL", "iaqIndex", "zone"]
+    },
+    "EVSession": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "EVSession",
+      "type": "object",
+      "description": "Represents an EV charging session.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the session." },
+        "bayId": { "type": "string", "description": "The charging bay used." },
+        "userId": { "type": "string", "description": "The user who started the session." },
+        "kwh": { "type": "number", "description": "Energy delivered in kWh." },
+        "cost": { "type": "number", "description": "Total cost of the session." },
+        "status": { "type": "string", "description": "Status of the session (e.g., 'charging', 'completed')." },
+        "startedAt": { "type": "string", "format": "date-time", "description": "Session start time." },
+        "endedAt": { "type": "string", "format": "date-time", "description": "Session end time, optional." }
+      },
+      "required": ["id", "bayId", "userId", "kwh", "cost", "status", "startedAt"]
     }
   },
   "auth": {
@@ -125,74 +188,53 @@
   "firestore": {
     "structure": [
       {
-        "path": "/themes/{themeId}",
-        "definition": {
-          "entityName": "Theme",
-          "schema": {
-            "$ref": "#/backend/entities/Theme"
-          },
-          "description": "Stores application themes. Includes fields for background color, gradients, neon accents, and focus styles.",
-          "params": [
-            {
-              "name": "themeId",
-              "description": "Unique identifier for the theme."
-            }
-          ]
-        }
+        "path": "/users/{userId}",
+        "definition": { "entityName": "User", "schema": { "$ref": "#/entities/User" }, "description": "Stores user profiles." }
       },
       {
-        "path": "/templates/{templateId}",
-        "definition": {
-          "entityName": "Template",
-          "schema": {
-            "$ref": "#/backend/entities/Template"
-          },
-          "description": "Stores UI templates. Includes denormalized 'themeId' for authorization independence.",
-          "params": [
-            {
-              "name": "templateId",
-              "description": "Unique identifier for the template."
-            }
-          ]
-        }
+        "path": "/units/{unitId}",
+        "definition": { "entityName": "Unit", "schema": { "$ref": "#/entities/Unit" }, "description": "Stores building unit information." }
       },
       {
-        "path": "/roles/{roleId}",
-        "definition": {
-          "entityName": "Role",
-          "schema": {
-            "$ref": "#/backend/entities/Role"
-          },
-          "description": "Stores role definitions, including name and permission prefix.",
-          "params": [
-            {
-              "name": "roleId",
-              "description": "Unique identifier for the role."
-            }
-          ]
-        }
+        "path": "/passes/{passId}",
+        "definition": { "entityName": "Pass", "schema": { "$ref": "#/entities/Pass" }, "description": "Stores visitor passes." }
       },
       {
-        "path": "/users/{userId}/roles/{roleId}",
-        "definition": {
-          "entityName": "Role",
-          "schema": {
-            "$ref": "#/backend/entities/Role"
-          },
-          "description": "Stores roles assigned to a specific user.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "Unique identifier for the user."
-            },
-            {
-              "name": "roleId",
-              "description": "Unique identifier for the role."
-            }
-          ]
-        }
+        "path": "/bookings/{bookingId}",
+        "definition": { "entityName": "Booking", "schema": { "$ref": "#/entities/Booking" }, "description": "Stores amenity bookings." }
+      },
+      {
+        "path": "/amenities/{amenityId}",
+        "definition": { "entityName": "Amenity", "schema": { "$ref": "#/entities/Amenity" }, "description": "Stores bookable amenities." }
+      },
+      {
+        "path": "/invoices/{invoiceId}",
+        "definition": { "entityName": "Invoice", "schema": { "$ref": "#/entities/Invoice" }, "description": "Stores user invoices." }
+      },
+      {
+        "path": "/tickets/{ticketId}",
+        "definition": { "entityName": "Ticket", "schema": { "$ref": "#/entities/Ticket" }, "description": "Stores maintenance and support tickets." }
+      },
+      {
+        "path": "/doors/{doorId}",
+        "definition": { "entityName": "Door", "schema": { "$ref": "#/entities/Door" }, "description": "Stores information about access-controlled doors." }
+      },
+      {
+        "path": "/accessLogs/{logId}",
+        "definition": { "entityName": "AccessLog", "schema": { "$ref": "#/entities/AccessLog" }, "description": "Logs of access attempts." }
+      },
+      {
+        "path": "/incidents/{incidentId}",
+        "definition": { "entityName": "Incident", "schema": { "$ref": "#/entities/Incident" }, "description": "Stores security and operational incidents." }
+      },
+      {
+        "path": "/energy/{energyId}",
+        "definition": { "entityName": "Energy", "schema": { "$ref": "#/entities/Energy" }, "description": "Stores energy consumption data." }
+      },
+      {
+        "path": "/evSessions/{sessionId}",
+        "definition": { "entityName": "EVSession", "schema": { "$ref": "#/entities/EVSession" }, "description": "Stores EV charging sessions." }
       }
-    ],
-    "reasoning": "The Firestore data structure is designed to support the Veralogix SecureConnect application, focusing on themes, templates, and role-based access control. To ensure authorization independence, we leverage denormalization. Roles are stored in a dedicated collection (`/roles/{roleId}`) and user roles are managed in the `/users/{userId}/roles/{roleId}` subcollection. This structure avoids hierarchical `get()` calls in security rules. The themes and templates are stored in their respective collections, `/themes` and `/templates`. Template documents denormalize the themeId to allow simple association for each template. This design facilitates secure `list` operations by segregating data based on role and ownership.\n\n*   **Authorization Independence:** Achieved through denormalization. User role information is duplicated, eliminating the need for `get()` calls in security rules.\n*   **QAPs (Rules are not Filters):** Supported through structural segregation (roles in separate collections) and path-based ownership (`/users/{userId}/roles/{roleId}`).\n*   **DBAC:** User roles are stored in the database in `/users/{userId}/roles/{roleId}`. No custom claims are used."
+    ]
   }
 }
