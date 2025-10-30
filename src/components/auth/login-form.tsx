@@ -51,7 +51,7 @@ export function LoginForm() {
       email: "",
       password: "",
       remember: false,
-      profile: "Resident",
+      profile: "Agent",
     },
   });
 
@@ -66,118 +66,120 @@ export function LoginForm() {
   }
 
   return (
-    <div className="w-full max-w-sm space-y-6 p-8 vx-card">
+    <div className="w-full max-w-sm space-y-6">
       <div className="text-center">
         <h1 className="text-3xl font-bold tracking-tight font-headline text-foreground">
-          SecureConnect™
+          Agent Secure Login
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Securely sign in to your Veralogix account.
+          Access the VeraLogix Command Center.
         </p>
       </div>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="profile"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Profile</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="vx-focus">
-                      <SelectValue placeholder="Select a profile to log in" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Agent">Agent</SelectItem>
-                    <SelectItem value="Resident">Resident</SelectItem>
-                    <SelectItem value="Trustee">Trustee</SelectItem>
-                    <SelectItem value="Vendor">Vendor</SelectItem>
-                    <SelectItem value="Estate Manager">Estate Manager</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email Address</FormLabel>
-                <FormControl>
-                  <Input placeholder="user@veralogix.com" {...field} className="vx-focus" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} className="vx-focus" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex items-center justify-between">
+      <div className="vx-card p-8">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="remember"
+              name="profile"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      className="vx-focus"
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>
-                      Remember me
-                    </FormLabel>
-                  </div>
+                <FormItem>
+                  <FormLabel>Profile</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="vx-focus">
+                        <SelectValue placeholder="Select a profile to log in" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Agent">Agent</SelectItem>
+                      <SelectItem value="Resident">Resident</SelectItem>
+                      <SelectItem value="Trustee">Trustee</SelectItem>
+                      <SelectItem value="Vendor">Vendor</SelectItem>
+                      <SelectItem value="Estate Manager">Estate Manager</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
                 </FormItem>
               )}
             />
-             <Link
-                href="#"
-                className="text-sm font-medium text-primary hover:text-primary/90 hover:underline underline-offset-4 transition-colors vx-focus"
-              >
-                Forgot password?
-              </Link>
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email Address</FormLabel>
+                  <FormControl>
+                    <Input placeholder="user@veralogix.com" {...field} className="vx-focus" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="••••••••" {...field} className="vx-focus" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex items-center justify-between">
+              <FormField
+                control={form.control}
+                name="remember"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="vx-focus"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Remember me
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              <Link
+                  href="#"
+                  className="text-sm font-medium text-primary hover:text-primary/90 hover:underline underline-offset-4 transition-colors vx-focus"
+                >
+                  Forgot password?
+                </Link>
+            </div>
+            <Button type="submit" className={cn("w-full transition-all vx-cta vx-focus")}>
+              <KeyRound className="mr-2 h-4 w-4" />
+              Sign In
+            </Button>
+          </form>
+        </Form>
+        
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
           </div>
-          <Button type="submit" className={cn("w-full transition-all vx-cta vx-focus", "hover:shadow-[0_0_15px_theme(colors.primary.DEFAULT)]")}>
-            <KeyRound className="mr-2 h-4 w-4" />
-            Sign In
-          </Button>
-        </form>
-      </Form>
-      
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
+          <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">
+              Or continue with
+              </span>
+          </div>
         </div>
-        <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-            Or continue with
-            </span>
-        </div>
+        
+        <Button variant="outline" className="w-full font-semibold transition-all vx-focus">
+          <Shield className="mr-2 h-4 w-4" />
+          Sign In with SSO
+        </Button>
       </div>
-      
-      <Button variant="outline" className="w-full font-semibold transition-all hover:border-accent hover:text-accent-foreground hover:shadow-[0_0_15px_theme(colors.accent)] vx-focus">
-        <Shield className="mr-2 h-4 w-4" />
-        Sign In with SSO
-      </Button>
     </div>
   );
 }

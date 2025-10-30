@@ -7,7 +7,7 @@ export default function Home() {
   const loginImage = PlaceHolderImages.find(p => p.id === 'login-background');
 
   return (
-    <div className="min-h-screen w-full bg-background font-body">
+    <div className="min-h-screen w-full bg-black font-body">
       <div className="grid h-screen w-full grid-cols-1 lg:grid-cols-2">
         <div className="relative hidden flex-col bg-muted p-10 text-white lg:flex">
           {loginImage && (
@@ -20,7 +20,7 @@ export default function Home() {
                 data-ai-hint={loginImage.imageHint}
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
           <div className="relative z-20 flex items-center text-lg font-medium font-headline">
             <Logo className="h-8 w-8 mr-2" />
             VeraLogix SecureConnect™
