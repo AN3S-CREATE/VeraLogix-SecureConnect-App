@@ -1,0 +1,198 @@
+{
+  "entities": {
+    "Theme": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Theme",
+      "type": "object",
+      "description": "Represents a theme for the Veralogix SecureConnect application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the theme."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the theme (e.g., 'Default', 'Dark')."
+        },
+        "background": {
+          "type": "string",
+          "description": "Background color of the theme, in hex format (e.g., '#373435')."
+        },
+        "primaryGradientStart": {
+          "type": "string",
+          "description": "Starting color of the primary gradient, in hex format."
+        },
+        "primaryGradientEnd": {
+          "type": "string",
+          "description": "Ending color of the primary gradient, in hex format."
+        },
+        "neonAccent1": {
+          "type": "string",
+          "description": "First neon accent color, in hex format."
+        },
+        "neonAccent2": {
+          "type": "string",
+          "description": "Second neon accent color, in hex format."
+        },
+        "neonAccent3": {
+          "type": "string",
+          "description": "Third neon accent color, in hex format."
+        },
+        "focusStyle": {
+          "type": "string",
+          "description": "CSS style for focus state, including color and shadow (e.g., '2px #B6FF2E with extra 3px shadow')."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "background",
+        "primaryGradientStart",
+        "primaryGradientEnd",
+        "neonAccent1",
+        "neonAccent2",
+        "neonAccent3",
+        "focusStyle"
+      ]
+    },
+    "Template": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Template",
+      "type": "object",
+      "description": "Represents a UI template (e.g., Card, ListPage).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the template."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the template (e.g., 'Card', 'KPI Card', 'ListPage')."
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of the template (e.g., 'Card', 'Page', 'Modal')."
+        },
+        "content": {
+          "type": "string",
+          "description": "The content or structure of the template, likely in a markup language (e.g., JSX, HTML)."
+        },
+        "themeId": {
+          "type": "string",
+          "description": "Reference to Theme. (Relationship: Theme 1:N Template)"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "content",
+        "themeId"
+      ]
+    },
+    "Role": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Role",
+      "type": "object",
+      "description": "Represents a user role within the Veralogix SecureConnect application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the role."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the role (e.g., 'resident', 'agent', 'trustee', 'vendor')."
+        },
+        "permissionPrefix": {
+          "type": "string",
+          "description": "Prefix used for permissions associated with this role (e.g., 'TEN', 'CMD', 'TRU', 'VEN')."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "permissionPrefix"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/themes/{themeId}",
+        "definition": {
+          "entityName": "Theme",
+          "schema": {
+            "$ref": "#/backend/entities/Theme"
+          },
+          "description": "Stores application themes. Includes fields for background color, gradients, neon accents, and focus styles.",
+          "params": [
+            {
+              "name": "themeId",
+              "description": "Unique identifier for the theme."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/templates/{templateId}",
+        "definition": {
+          "entityName": "Template",
+          "schema": {
+            "$ref": "#/backend/entities/Template"
+          },
+          "description": "Stores UI templates. Includes denormalized 'themeId' for authorization independence.",
+          "params": [
+            {
+              "name": "templateId",
+              "description": "Unique identifier for the template."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles/{roleId}",
+        "definition": {
+          "entityName": "Role",
+          "schema": {
+            "$ref": "#/backend/entities/Role"
+          },
+          "description": "Stores role definitions, including name and permission prefix.",
+          "params": [
+            {
+              "name": "roleId",
+              "description": "Unique identifier for the role."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/roles/{roleId}",
+        "definition": {
+          "entityName": "Role",
+          "schema": {
+            "$ref": "#/backend/entities/Role"
+          },
+          "description": "Stores roles assigned to a specific user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            },
+            {
+              "name": "roleId",
+              "description": "Unique identifier for the role."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to support the Veralogix SecureConnect application, focusing on themes, templates, and role-based access control. To ensure authorization independence, we leverage denormalization. Roles are stored in a dedicated collection (`/roles/{roleId}`) and user roles are managed in the `/users/{userId}/roles/{roleId}` subcollection. This structure avoids hierarchical `get()` calls in security rules. The themes and templates are stored in their respective collections, `/themes` and `/templates`. Template documents denormalize the themeId to allow simple association for each template. This design facilitates secure `list` operations by segregating data based on role and ownership.\n\n*   **Authorization Independence:** Achieved through denormalization. User role information is duplicated, eliminating the need for `get()` calls in security rules.\n*   **QAPs (Rules are not Filters):** Supported through structural segregation (roles in separate collections) and path-based ownership (`/users/{userId}/roles/{roleId}`).\n*   **DBAC:** User roles are stored in the database in `/users/{userId}/roles/{roleId}`. No custom claims are used."
+  }
+}
