@@ -6,13 +6,13 @@
   :root {
     --black: #373435;
     --white: #fff;
-    --g1: #a8cf45;
-    --g2: #bad96b;
-    --g3: #7d9c33;
-    --g4: #455c08;
-    --eb: #00ffff;
-    --np: #ff6ec7;
-    --cp: #9d00ff;
+    --g1: #A8CF45;
+    --g2: #BAD96B;
+    --g3: #7D9C33;
+    --g4: #455C08;
+    --neon-1: #B6FF2E;
+    --neon-2: #E4FF66;
+    --neon-3: #D4FF00;
     --background: 336 2% 12%;
     --foreground: 0 0% 98%;
     --card: 336 2% 13%;
@@ -31,7 +31,7 @@
     --destructive-foreground: 0 0% 98%;
     --border: 78 55% 54% / 0.25;
     --input: 330 3% 25%;
-    --ring: 180 100% 50%;
+    --ring: 75 92% 58%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -66,7 +66,7 @@
     --destructive-foreground: 0 0% 98%;
     --border: 78 55% 54% / 0.25;
     --input: 330 3% 25%;
-    --ring: 180 100% 50%;
+    --ring: 75 92% 58%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -93,34 +93,46 @@
 }
 
 @layer components {
-  .vx-card {
-    background: linear-gradient(
-        180deg,
-        rgba(168, 207, 69, 0.08),
-        rgba(69, 92, 8, 0.04)
-      ),
-      var(--black);
-    border: 1px solid rgba(168, 207, 69, 0.25);
-    border-radius: 20px;
-    box-shadow: 0 0 0 1px rgba(0, 255, 255, 0.08) inset,
-      0 10px 30px rgba(0, 0, 0, 0.35);
+  /* Focus rings (visible, AA-friendly) */
+  .vx-focus:focus{
+    outline:2px solid var(--neon-1);
+    outline-offset:2px;
+    box-shadow:0 0 0 3px color-mix(in oklab,var(--neon-1) 35%, transparent)
   }
-  .vx-cta {
-    background: linear-gradient(90deg, var(--g1), var(--g2), var(--g3));
-    color: var(--black);
-    font-weight: 700;
-    border-radius: 12px;
-    padding: 0.875rem 1.25rem;
+  
+  /* Cards */
+  .vx-card{
+    background:linear-gradient(180deg,rgba(168,207,69,.08),rgba(69,92,8,.04)),var(--black);
+    border:1px solid rgba(168,207,69,.25);
+    border-radius:20px;
+    box-shadow:0 0 0 1px color-mix(in oklab,var(--neon-2) 18%, transparent) inset,0 10px 30px rgba(0,0,0,.35)
   }
-  .vx-focus:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.45),
-      0 0 24px rgba(168, 207, 69, 0.35);
+  .vx-card:hover{
+    box-shadow:0 0 24px color-mix(in oklab,var(--neon-1) 45%, transparent),0 0 6px color-mix(in oklab,var(--neon-2) 35%, transparent) inset
   }
-  /* Previous focus style for vx-cta, retained for compatibility */
-  .vx-cta:focus {
+  
+  /* Primary CTA */
+  .vx-cta{
+    background:linear-gradient(90deg,var(--g1),var(--g2),var(--g3));
+    color:#1a1a1a;
+    font-weight:700;
+    border-radius:12px;padding:.875rem 1.25rem
+  }
+  .vx-cta:focus{
     outline: none;
     box-shadow: 0 0 0 3px color-mix(in oklab, hsl(var(--accent)) 85%, transparent),
       0 0 24px color-mix(in oklab, hsl(var(--accent)) 55%, transparent);
+  }
+  
+  /* Chips */
+  .chip-info{
+    background:color-mix(in oklab,var(--neon-2) 20%, transparent);
+    border:1px solid color-mix(in oklab,var(--neon-2) 45%, transparent);
+    color:#203000
+  }
+  .chip-alert{
+    background:color-mix(in oklab,var(--neon-3) 22%, transparent);
+    border:1px solid color-mix(in oklab,var(--neon-3) 50%, transparent);
+    color:#172000
   }
 }
