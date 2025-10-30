@@ -13,7 +13,7 @@
     --neon-1: #B6FF2E;
     --neon-2: #E4FF66;
     --neon-3: #D4FF00;
-    --background: 336 2% 12%;
+    --background: 330 3% 11%;
     --foreground: 0 0% 98%;
     --card: 336 2% 13%;
     --card-foreground: 0 0% 98%;
@@ -48,7 +48,7 @@
     --sidebar-ring: 80 100% 59%;
   }
   .dark {
-    --background: 336 2% 12%;
+    --background: 330 3% 11%;
     --foreground: 0 0% 98%;
     --card: 336 2% 13%;
     --card-foreground: 0 0% 98%;
@@ -88,7 +88,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-black text-foreground;
   }
 }
 
@@ -121,7 +121,7 @@
   .vx-cta:focus{
     outline: none;
     box-shadow: 0 0 0 3px color-mix(in oklab, hsl(var(--accent)) 85%, transparent),
-      0 0 24px color-mix(in oklab, hsl(var(--accent)) 55%, transparent);
+      0 0 40px rgba(212,255,0,.35);
   }
   
   /* Chips */
