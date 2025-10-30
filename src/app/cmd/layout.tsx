@@ -1,5 +1,5 @@
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Shield, Home, KeyRound, Menu, User, Settings, Plug, ShieldAlert, Wrench, ReceiptText } from "lucide-react";
+import { Shield, Home, KeyRound, Menu, User, Settings, Plug, ShieldAlert, Wrench, ReceiptText, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
 
@@ -42,6 +42,11 @@ export default function CmdLayout({
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Invoices">
                 <Link href="/cmd/invoices"><ReceiptText /><span>Invoices</span></Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Pricing">
+                <Link href="/cmd/pricing"><DollarSign /><span>Pricing</span></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
