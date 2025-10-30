@@ -1,3 +1,4 @@
+
 "use client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -61,7 +62,7 @@ export default function TenWalletPage() {
                     <td className="p-4 text-muted-foreground">{item.date}</td>
                     <td className="p-4">{item.type}</td>
                     <td className={`p-4 text-right font-medium ${item.amount > 0 ? 'delta-positive' : 'text-foreground'}`}>
-                      {item.amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                      {item.amount > 0 ? '+' : ''}{item.amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                     </td>
                   </tr>
                 ))}
