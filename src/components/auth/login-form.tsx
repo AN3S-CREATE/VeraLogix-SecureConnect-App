@@ -49,7 +49,7 @@ export function LoginForm() {
   }
 
   return (
-    <div className="w-full max-w-sm space-y-6">
+    <div className="w-full max-w-sm space-y-6 p-8 vx-card">
       <div className="text-center">
         <h1 className="text-3xl font-bold tracking-tight font-headline text-foreground">
           Agent Console
@@ -69,7 +69,7 @@ export function LoginForm() {
                 <FormLabel>Profile</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="vx-focus">
                       <SelectValue placeholder="Select a profile to log in" />
                     </SelectTrigger>
                   </FormControl>
@@ -92,7 +92,7 @@ export function LoginForm() {
               <FormItem>
                 <FormLabel>Email Address</FormLabel>
                 <FormControl>
-                  <Input placeholder="agent@veralogix.com" {...field} />
+                  <Input placeholder="agent@veralogix.com" {...field} className="vx-focus" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -105,7 +105,7 @@ export function LoginForm() {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
+                  <Input type="password" placeholder="••••••••" {...field} className="vx-focus" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -121,6 +121,7 @@ export function LoginForm() {
                     <Checkbox
                       checked={field.value}
                       onCheckedChange={field.onChange}
+                      className="vx-focus"
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
@@ -133,7 +134,7 @@ export function LoginForm() {
             />
              <Link
                 href="#"
-                className="text-sm font-medium text-primary hover:text-primary/90 hover:underline underline-offset-4 transition-colors"
+                className="text-sm font-medium text-primary hover:text-primary/90 hover:underline underline-offset-4 transition-colors vx-focus"
               >
                 Forgot password?
               </Link>
@@ -156,7 +157,7 @@ export function LoginForm() {
         </div>
       </div>
       
-      <Button variant="outline" className="w-full font-semibold transition-all hover:border-accent hover:text-accent-foreground hover:shadow-[0_0_15px_theme(colors.accent)]">
+      <Button variant="outline" className="w-full font-semibold transition-all hover:border-accent hover:text-accent-foreground hover:shadow-[0_0_15px_theme(colors.accent)] vx-focus">
         <Shield className="mr-2 h-4 w-4" />
         Sign In with SSO
       </Button>
