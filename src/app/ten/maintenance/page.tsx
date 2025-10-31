@@ -6,16 +6,18 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Paperclip } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function TenMaintenancePage() {
   const tickets = [
     { id: "TKT-001", title: "Leaky Faucet", status: "In Progress", sla: 75 },
     { id: "TKT-002", title: "AC Not Cooling", status: "Resolved", sla: 100 },
     { id: "TKT-003", title: "Broken Light Fixture", status: "New", sla: 10 },
+    { id: "TKT-004", title: "Jammed security gate", status: "In Progress", sla: 90 },
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" id="new">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-foreground">Maintenance</h1>
         <Dialog>
@@ -72,8 +74,14 @@ export default function TenMaintenancePage() {
             <div className="w-full sm:w-1/3 text-left sm:text-right">
               <div className="flex items-center gap-2 sm:justify-end">
                 <p className="text-xs text-muted-foreground">SLA</p>
-                <Progress value={ticket.sla} className={`h-2 w-24 [&>div]:bg-neon-2 ${ticket.sla > 85 ? '[&>div]:bg-neon-3' : ''}`} />
-                 <span className={`text-xs font-mono ${ticket.sla > 85 ? 'text-neon-3' : 'text-neon-2'}`}>{ticket.sla}%</span>
+                <Progress value={ticket.sla} className={cn(
+                    "h-2 w-24",
+                    ticket.sla < 85 ? "[&>div]:bg-neon-2" : "[&>div]:bg-neon-3"
+                  )} />
+                 <span className={cn(
+                    "text-xs font-mono",
+                    ticket.sla < 85 ? "text-neon-2" : "text-neon-3"
+                  )}>{ticket.sla}%</span>
               </div>
                <p className="text-xs text-muted-foreground mt-1">Chat about this issue</p>
             </div>
