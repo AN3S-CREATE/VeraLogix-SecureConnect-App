@@ -15,6 +15,10 @@ export default function TenEvPage() {
 
   const activeSession = true; // Set to false to see the other state
 
+  const handleStopCharging = () => {
+    console.log('sc.agent.ev.session_stopped', { bayId: 2, reason: 'user_request' });
+  };
+
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold text-foreground">EV Charging</h1>
@@ -26,7 +30,7 @@ export default function TenEvPage() {
                   <h2 className="text-xl font-bold">Active Session: Bay 2</h2>
                   <p className="text-muted-foreground">Tesla Model 3</p>
               </div>
-              <Button variant="destructive" className="vx-focus">Stop Charging</Button>
+              <Button variant="destructive" className="vx-focus" onClick={handleStopCharging}>Stop Charging</Button>
           </div>
           <div className="mt-4 relative flex items-center justify-center w-48 h-48 mx-auto">
               <svg className="absolute inset-0" viewBox="0 0 100 100">

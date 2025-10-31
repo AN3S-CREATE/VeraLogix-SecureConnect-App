@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,11 @@ export default function EvChargingPlannerPage() {
         { hour: '10:00', load: 95, capacity: 100 },
         { hour: '11:00', load: 80, capacity: 100 },
     ];
+    
+    const handleLoadShed = () => {
+        console.log('sc.agent.ev.load_shed_initiated');
+        // This would typically stop some charging sessions
+    };
 
     return (
         <div className="space-y-8">
@@ -108,7 +114,7 @@ export default function EvChargingPlannerPage() {
                              <p className="font-bold text-2xl text-gradient-primary">85 kW</p>
                              <p className="text-sm text-muted-foreground">Current Site Load</p>
                          </div>
-                         <Button className="w-full mt-4 vx-cta vx-focus bg-destructive hover:bg-destructive/80 text-destructive-foreground">
+                         <Button className="w-full mt-4 vx-cta vx-focus bg-destructive hover:bg-destructive/80 text-destructive-foreground" onClick={handleLoadShed}>
                             Initiate Load Shed
                         </Button>
                     </div>

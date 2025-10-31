@@ -11,14 +11,18 @@ import { useState } from "react";
 
 export default function TenAmenitiesPage() {
   const amenities = [
-    { id: 1, name: "Pool & Jacuzzi", image: "https://picsum.photos/seed/pool/600/400", hint: "pool jacuzzi", available: true, rule: "Max 4 guests" },
-    { id: 2, name: "Rooftop BBQ", image: "https://picsum.photos/seed/bbq/600/400", hint: "rooftop bbq", available: true, rule: "Closes at 10 PM" },
-    { id: 3, name: "Cinema Room", image: "https://picsum.photos/seed/cinema/600/400", hint: "cinema room", available: false, rule: null },
-    { id: 4, name: "Fitness Center", image: "https://picsum.photos/seed/gym/600/400", hint: "fitness center", available: true, rule: "2-hour limit" },
+    { id: 1, name: "Pool & Jacuzzi", image: "https://picsum.photos/seed/pool/600/400", hint: "pool jacuzzi", available: true, rule: "Max 4 guests", price: 27.50 },
+    { id: 2, name: "Rooftop BBQ", image: "https://picsum.photos/seed/bbq/600/400", hint: "rooftop bbq", available: true, rule: "Closes at 10 PM", price: 35.00 },
+    { id: 3, name: "Cinema Room", image: "https://picsum.photos/seed/cinema/600/400", hint: "cinema room", available: false, rule: null, price: 50.00 },
+    { id: 4, name: "Fitness Center", image: "https://picsum.photos/seed/gym/600/400", hint: "fitness center", available: true, rule: "2-hour limit", price: 10.00 },
   ];
   
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedSlot, setSelectedSlot] = useState<string | null>("11:00");
+
+  const handleBook = (id: number, price: number) => {
+    console.log('sc.res.amenity.booked', { id, price });
+  };
 
 
   return (
@@ -76,14 +80,14 @@ export default function TenAmenitiesPage() {
                 <div>
                     <h3 className="font-semibold mb-2">Price Breakdown</h3>
                     <div className="text-sm text-muted-foreground space-y-1">
-                        <div className="flex justify-between"><span>Booking Fee</span><span>$25.00</span></div>
-                        <div className="flex justify-between"><span>Taxes</span><span>$2.50</span></div>
-                        <div className="flex justify-between font-bold text-foreground"><span>Total</span><span>$27.50</span></div>
+                        <div className="flex justify-between"><span>Booking Fee</span><span>${(amenity.price * 0.9).toFixed(2)}</span></div>
+                        <div className="flex justify-between"><span>Taxes</span><span>${(amenity.price * 0.1).toFixed(2)}</span></div>
+                        <div className="flex justify-between font-bold text-foreground"><span>Total</span><span>${amenity.price.toFixed(2)}</span></div>
                     </div>
                 </div>
-                <Button asChild className="w-full vx-cta vx-focus">
-                  <Link href="/ten/wallet#pay">Proceed to Payment</Link>
-                </Button>
+                <Link href="/ten/wallet#pay" passHref>
+                  <Button className="w-full vx-cta vx-focus" onClick={() => handleBook(amenity.id, amenity.price)}>Proceed to Payment</Button>
+                </Link>
               </div>
             </SheetContent>
           </Sheet>

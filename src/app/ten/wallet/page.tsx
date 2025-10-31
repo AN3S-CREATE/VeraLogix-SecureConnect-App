@@ -4,14 +4,28 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 export default function TenWalletPage() {
+  const { toast } = useToast();
   const transactions = [
     { id: "TRN-001", type: "Amenity Booking", amount: -27.50, date: "2024-08-01" },
     { id: "TRN-002", type: "Account Top-up", amount: 100.00, date: "2024-07-30" },
     { id: "TRN-003", type: "EV Charging", amount: -12.75, date: "2024-07-29" },
     { id: "TRN-004", type: "Guest Pass Fee", amount: -5.00, date: "2024-07-28" },
   ];
+
+  const handlePayment = () => {
+    console.log('sc.res.payments.pay_initiated');
+    // Simulate API call
+    setTimeout(() => {
+      console.log('sc.res.payments.success');
+      toast({
+        title: "Payment Successful",
+        description: "Your account balance has been updated.",
+      });
+    }, 1000);
+  };
 
   return (
     <div className="space-y-8" id="pay">
@@ -38,7 +52,7 @@ export default function TenWalletPage() {
             </div>
             <DialogFooter>
               <Button variant="secondary">Cancel</Button>
-              <Button className="vx-cta vx-focus">Confirm Payment</Button>
+              <Button className="vx-cta vx-focus" onClick={handlePayment}>Confirm Payment</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

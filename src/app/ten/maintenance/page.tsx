@@ -1,6 +1,7 @@
+
 "use client";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -15,6 +16,10 @@ export default function TenMaintenancePage() {
     { id: "TKT-003", title: "Broken Light Fixture", status: "New", sla: 10 },
     { id: "TKT-004", title: "Jammed security gate", status: "In Progress", sla: 90 },
   ];
+
+  const handleTicketCreate = () => {
+    console.log('sc.res.maint.ticket_created');
+  };
 
   return (
     <div className="space-y-8" id="new">
@@ -57,8 +62,12 @@ export default function TenMaintenancePage() {
               </div>
             </div>
             <DialogFooter>
-                <Button variant="secondary">Cancel</Button>
-                <Button className="vx-cta">Submit Ticket</Button>
+                <DialogClose asChild>
+                  <Button variant="secondary">Cancel</Button>
+                </DialogClose>
+                <DialogClose asChild>
+                  <Button className="vx-cta" onClick={handleTicketCreate}>Submit Ticket</Button>
+                </DialogClose>
             </DialogFooter>
           </DialogContent>
         </Dialog>

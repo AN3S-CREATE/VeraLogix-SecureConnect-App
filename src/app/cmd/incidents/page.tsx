@@ -2,7 +2,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -27,6 +27,14 @@ export default function IncidentsPage() {
         medium: { label: 'Medium', className: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50' },
         low: { label: 'Low', className: 'bg-blue-500/20 text-blue-400 border-blue-500/50' },
     } as const;
+
+    const handleAssign = (assignee: string) => {
+        console.log('sc.agent.incidents.assign', { incidentId: selectedIncident.id, assignee });
+    };
+    
+    const handleResolve = () => {
+        console.log('sc.agent.incidents.resolve', { incidentId: selectedIncident.id });
+    };
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-8rem)]">
@@ -81,7 +89,7 @@ export default function IncidentsPage() {
 
                 <div className="space-y-4">
                     <h3 className="font-semibold">Assign</h3>
-                     <Select defaultValue={selectedIncident.assignee !== 'Unassigned' ? selectedIncident.assignee : undefined}>
+                     <Select defaultValue={selectedIncident.assignee !== 'Unassigned' ? selectedIncident.assignee : undefined} onValueChange={handleAssign}>
                         <SelectTrigger className="w-full vx-focus">
                             <SelectValue placeholder="Select an assignee" />
                         </SelectTrigger>
@@ -145,8 +153,12 @@ export default function IncidentsPage() {
                             <DialogFooter className="sm:justify-between">
                                 <Button variant="outline" className="vx-focus"><Download className="mr-2" /> Export Report</Button>
                                 <div>
-                                    <Button variant="secondary">Cancel</Button>
-                                    <Button className="vx-cta vx-focus ml-2">Confirm Resolution</Button>
+                                    <DialogClose asChild>
+                                      <Button variant="secondary">Cancel</Button>
+                                    </DialogClose>
+                                    <DialogClose asChild>
+                                      <Button className="vx-cta vx-focus ml-2" onClick={handleResolve}>Confirm Resolution</Button>
+                                    </DialogClose>
                                 </div>
                             </DialogFooter>
                         </DialogContent>

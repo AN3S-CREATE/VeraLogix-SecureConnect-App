@@ -39,11 +39,17 @@ export default function TenKeysPage() {
     return () => clearInterval(timer);
   }, [showQr]);
 
-  const handleTapToOpen = () => {
-    toast({
-      title: "Success",
-      description: "Gate opened successfully. Entry recorded in history.",
-    });
+  const handleTapToOpen = (door_id: string) => {
+    console.log('sc.res.access.open_initiated', { door_id });
+    // Simulate API call
+    setTimeout(() => {
+      const result = 'granted'; // 'granted' or 'denied'
+      console.log('sc.res.access.open_result', { door_id, result });
+      toast({
+        title: "Success",
+        description: `Gate opened successfully. Result: ${result}. Entry recorded in history.`,
+      });
+    }, 500);
   };
 
   return (
@@ -76,7 +82,7 @@ export default function TenKeysPage() {
                 </div>
                 <p className="text-muted-foreground mt-1">Lobby and package room access</p>
             </div>
-            <Button className="w-full mt-6 vx-cta tap-button h-20 text-xl" onClick={handleTapToOpen}>
+            <Button className="w-full mt-6 vx-cta tap-button h-20 text-xl" onClick={() => handleTapToOpen('main-entrance')}>
                 Tap to Open
             </Button>
             </div>

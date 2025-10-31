@@ -9,6 +9,10 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export default function TenHomePage() {
 
+  const handleShortcutTap = (action: string) => {
+    console.log('sc.res.home.shortcut_tapped', { action });
+  };
+
   return (
     <div className="space-y-8">
       {/* Offline indicator placeholder */}
@@ -29,16 +33,16 @@ export default function TenHomePage() {
       {/* Shortcut Pills */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Link href="/ten/keys#tap" passHref>
-          <Button className="w-full vx-cta vx-focus">Open Gate</Button>
+          <Button className="w-full vx-cta vx-focus" onClick={() => handleShortcutTap('open_gate')}>Open Gate</Button>
         </Link>
         <Link href="/ten/amenities#calendar" passHref>
-          <Button className="w-full vx-cta vx-focus">Book Amenity</Button>
+          <Button className="w-full vx-cta vx-focus" onClick={() => handleShortcutTap('book_amenity')}>Book Amenity</Button>
         </Link>
         <Link href="/ten/wallet#pay" passHref>
-          <Button className="w-full vx-cta vx-focus">Pay Now</Button>
+          <Button className="w-full vx-cta vx-focus" onClick={() => handleShortcutTap('pay_now')}>Pay Now</Button>
         </Link>
         <Link href="/ten/maintenance#new" passHref>
-          <Button className="w-full vx-cta vx-focus">Report Issue</Button>
+          <Button className="w-full vx-cta vx-focus" onClick={() => handleShortcutTap('report_issue')}>Report Issue</Button>
         </Link>
       </div>
 
@@ -112,4 +116,3 @@ function KpiCard({ title, value, trend, trendDirection }: { title: string, value
     </div>
   );
 }
-

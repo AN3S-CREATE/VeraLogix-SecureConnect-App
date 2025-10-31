@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -12,17 +13,23 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 export default function TruOverviewPage() {
   const trustImage = PlaceHolderImages.find(p => p.id === 'trust-background');
   const router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    console.log('sc.trust.overview.loaded');
+  }, []);
 
   const handleLink = () => {
     toast({

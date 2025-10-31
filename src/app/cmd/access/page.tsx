@@ -1,10 +1,11 @@
+
 "use client";
 
 import { DoorCard } from "@/components/agent/door-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { UserPlus, ShieldAlert, Timer, Map, List, KeyRound, RadioTower } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,14 @@ export default function AccessControlPage() {
       { id: 2, name: "Delivery Drone #A4", location: "Rooftop Landing", time: "3 mins ago", status: "granted" },
       { id: 3, name: "Unknown", location: "Parking Garage P1", time: "5 mins ago", status: "denied" },
   ];
+
+  const handleOverride = () => {
+      console.log('sc.agent.access.override_initiated');
+      // Simulate API call
+      setTimeout(() => {
+          console.log('sc.agent.access.override_completed');
+      }, 1000);
+  };
 
   return (
     <div className="space-y-8">
@@ -163,8 +172,12 @@ export default function AccessControlPage() {
                                     </div>
                                 </div>
                                 <DialogFooter>
-                                    <Button variant="secondary">Cancel</Button>
-                                    <Button variant="destructive" className="vx-focus">Confirm & Override</Button>
+                                    <DialogClose asChild>
+                                      <Button variant="secondary">Cancel</Button>
+                                    </DialogClose>
+                                    <DialogClose asChild>
+                                      <Button variant="destructive" className="vx-focus" onClick={handleOverride}>Confirm & Override</Button>
+                                    </DialogClose>
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
@@ -176,5 +189,3 @@ export default function AccessControlPage() {
     </div>
   );
 }
-
-    
