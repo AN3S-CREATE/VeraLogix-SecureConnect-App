@@ -14,7 +14,7 @@ export default function TenWalletPage() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" id="pay">
       <div className="vx-card p-6 flex justify-between items-center">
         <div>
           <p className="text-sm text-foreground/80">Current Balance</p>
@@ -25,7 +25,7 @@ export default function TenWalletPage() {
             <Button className="vx-cta vx-focus">Pay Now</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-background border-white/10">
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[var(--neon-2)] to-transparent"></div>
+            <div className="absolute top-0 left-0 right-0 h-[1px]" style={{ background: 'linear-gradient(to right, transparent, var(--neon-2), transparent)' }}></div>
             <DialogHeader>
               <DialogTitle>Make a Payment</DialogTitle>
               <DialogDescription>Top up your account balance.</DialogDescription>
