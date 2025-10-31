@@ -39,15 +39,20 @@ export default function ResolutionsPage() {
          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-8rem)]">
             <style jsx global>{`
                 .status-voting {
-                    background-color: hsl(var(--neon-2) / 0.2);
-                    color: hsl(var(--neon-2) / 0.9);
-                    border-color: hsl(var(--neon-2) / 0.5);
-                    animation: pulse-border 2s infinite;
+                  background-color: hsl(var(--neon-2) / 0.2);
+                  color: hsl(var(--neon-2) / 0.9);
+                  border-color: hsl(var(--neon-2) / 0.5);
+                  animation: pulse-border 2s infinite;
                 }
                 @keyframes pulse-border {
                     0% { box-shadow: 0 0 0 0 hsl(var(--neon-2) / 0.4); }
                     70% { box-shadow: 0 0 0 5px hsl(var(--neon-2) / 0); }
                     100% { box-shadow: 0 0 0 0 hsl(var(--neon-2) / 0); }
+                }
+                .signature-pad:focus-visible {
+                  outline: 2px solid #B6FF2E;
+                  outline-offset: 2px;
+                  box-shadow: 0 0 20px #B6FF2E;
                 }
             `}</style>
 
@@ -150,7 +155,7 @@ export default function ResolutionsPage() {
                 {/* E-Signature */}
                 <div className="space-y-2 pt-4 border-t">
                     <h3 className="font-semibold flex items-center gap-2"><Signature /> E-Signature to Ratify</h3>
-                    <div className="aspect-[3/1] w-full bg-black/20 rounded-md border border-border flex items-center justify-center text-muted-foreground vx-focus" tabIndex={0} style={{boxShadow: '0 0 0 0px var(--neon-1)'}}>
+                    <div className="aspect-[3/1] w-full bg-black/20 rounded-md border border-border flex items-center justify-center text-muted-foreground signature-pad" tabIndex={0}>
                         <p>Sign here to ratify the passed resolution</p>
                     </div>
                      <Button className="w-full vx-cta vx-focus" disabled={selectedResolution.status !== 'Passed'}>
