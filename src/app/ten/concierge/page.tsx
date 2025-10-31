@@ -67,6 +67,7 @@ export default function TenConciergePage() {
             <div className="flex gap-2">
                 <Button variant="outline" className="chip-info vx-focus">Book Amenity</Button>
                 <Button variant="outline" className="chip-info vx-focus">Make Payment</Button>
+                <Button variant="outline" className="chip-info vx-focus">New Pass</Button>
                 <Button variant="outline" className="chip-info vx-focus">Report Issue</Button>
             </div>
             <div className="flex gap-2">
