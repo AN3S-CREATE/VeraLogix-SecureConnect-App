@@ -188,5 +188,18 @@
   .embla__dot--selected {
     background-color: var(--neon-2);
   }
-}
 
+  /* State: Error */
+  .vx-error-banner {
+    @apply relative overflow-hidden rounded-lg bg-black p-4 text-foreground;
+    border-left: 4px solid var(--neon-3);
+    box-shadow: 0 0 15px color-mix(in oklab, var(--neon-3) 25%, transparent);
+  }
+
+  /* State: Offline */
+  .vx-offline-strip {
+    @apply p-2 text-center text-sm text-muted-foreground;
+    border-bottom: 1px solid var(--neon-2);
+    background-color: color-mix(in oklab, var(--neon-2) 10%, transparent);
+  }
+}
