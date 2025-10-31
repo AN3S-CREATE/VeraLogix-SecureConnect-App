@@ -56,7 +56,7 @@ export default function TenKeysPage() {
     <Tabs defaultValue="keys" className="w-full space-y-8">
         <style jsx global>{`
             .tap-button:focus-visible {
-                box-shadow: 0 0 0 2px var(--neon-1), 0 0 0 5px color-mix(in oklab, var(--neon-1) 35%, transparent), 0 0 40px rgba(212, 255, 0, 0.35);
+                box-shadow: 0 0 0 2px var(--neon-1), 0 0 0 5px color-mix(in oklab, var(--neon-1) 35%, transparent), 0 0 40px rgba(182, 255, 46, 0.45);
             }
             .qr-timer-chip {
                 background-color: hsl(var(--neon-2) / 0.2);

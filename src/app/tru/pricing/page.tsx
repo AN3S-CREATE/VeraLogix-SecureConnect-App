@@ -1,3 +1,4 @@
+
 "use client";
 import { Button } from "@/components/ui/button";
 import { Signature, ThumbsDown, ThumbsUp } from "lucide-react";
@@ -72,7 +73,7 @@ export default function TrusteePricingPage() {
                                                 Why this price?
                                             </Button>
                                         </DialogTrigger>
-                                         <DialogContent className="sm:max-w-md bg-background border-[var(--neon-2)]/50" style={{boxShadow: '0 0 40px rgba(182,255,46,.35)'}}>
+                                         <DialogContent className="sm:max-w-md bg-background border-[var(--neon-2)]/50" style={{boxShadow: '0 0 40px rgba(228,255,102,.35)'}}>
                                             <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[var(--neon-2)] to-transparent"></div>
                                             <DialogHeader>
                                                 <DialogTitle>Pricing Decision Explanation</DialogTitle>

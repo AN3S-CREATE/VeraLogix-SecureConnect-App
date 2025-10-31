@@ -103,7 +103,7 @@
   
   /* Cards */
   .vx-card{
-    background:linear-gradient(180deg,rgba(168,207,69,.08),rgba(69,92,8,.04)),var(--black);
+    background:linear-gradient(180deg,rgba(182,255,46,.12),rgba(69,92,8,.04)),var(--black);
     border:1px solid rgba(168,207,69,.25);
     border-radius:20px;
     box-shadow:0 0 0 1px color-mix(in lch,var(--neon-2) 18%, transparent) inset,0 10px 30px rgba(0,0,0,.35)
