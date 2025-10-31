@@ -175,4 +175,18 @@
   .vx-tabs-trigger[data-state=active] {
     box-shadow: 0 2px 0 0 var(--neon-1), 0 3px 8px color-mix(in oklab, var(--neon-1) 25%, transparent);
   }
+
+  /* Carousel */
+  .embla__dot {
+    background-color: transparent;
+    border: 1px solid var(--neon-2);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  .embla__dot--selected {
+    background-color: var(--neon-2);
+  }
 }
+

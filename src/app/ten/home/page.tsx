@@ -1,3 +1,4 @@
+
 "use client";
 
 import { ArrowUp, ChevronLeft, ChevronRight } from "lucide-react";
@@ -111,3 +112,4 @@ function KpiCard({ title, value, trend, trendDirection }: { title: string, value
     </div>
   );
 }
+
