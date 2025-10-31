@@ -50,7 +50,7 @@ export default function TenKeysPage() {
     <Tabs defaultValue="keys" className="w-full space-y-8">
         <style jsx global>{`
             .tap-button:focus-visible {
-                box-shadow: 0 0 0 2px #B6FF2E, 0 0 0 5px rgba(182, 255, 46, 0.35), 0 0 40px rgba(212, 255, 0, 0.35);
+                box-shadow: 0 0 0 2px var(--neon-1), 0 0 0 5px color-mix(in oklab, var(--neon-1) 35%, transparent), 0 0 40px rgba(212, 255, 0, 0.35);
             }
             .qr-timer-chip {
                 background-color: hsl(var(--neon-2) / 0.2);
@@ -66,7 +66,7 @@ export default function TenKeysPage() {
         </TabsList>
       </div>
       
-      <TabsContent value="keys" className="mt-0 space-y-8">
+      <TabsContent value="keys" className="mt-0 space-y-8" id="tap">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="vx-card p-6 flex flex-col justify-between">
             <div>
@@ -161,4 +161,3 @@ export default function TenKeysPage() {
     </Tabs>
   );
 }
-
