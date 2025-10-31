@@ -6,6 +6,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function TenAmenitiesPage() {
@@ -80,7 +81,9 @@ export default function TenAmenitiesPage() {
                         <div className="flex justify-between font-bold text-foreground"><span>Total</span><span>$27.50</span></div>
                     </div>
                 </div>
-                <Button className="w-full vx-cta vx-focus">Proceed to Payment</Button>
+                <Button asChild className="w-full vx-cta vx-focus">
+                  <Link href="/ten/wallet#pay">Proceed to Payment</Link>
+                </Button>
               </div>
             </SheetContent>
           </Sheet>
