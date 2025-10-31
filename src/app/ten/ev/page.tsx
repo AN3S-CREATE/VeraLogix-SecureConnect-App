@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -46,9 +47,9 @@ export default function TenEvPage() {
                   <p className="text-sm text-muted-foreground">12.5 kWh delivered</p>
               </div>
           </div>
-           <div className="mt-4 p-2 text-center text-sm bg-yellow-500/20 text-yellow-400 border border-yellow-500/50 rounded-md"
+           <div className="mt-4 p-2 text-center text-sm rounded-md"
              style={{
-                borderColor: 'var(--neon-3)',
+                border: '1px solid var(--neon-3)',
                 color: 'var(--neon-3)',
                 backgroundColor: 'color-mix(in lch, var(--neon-3) 20%, transparent)'
             }}
