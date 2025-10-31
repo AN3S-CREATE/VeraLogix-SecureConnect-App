@@ -22,6 +22,19 @@ export default function PricingPage() {
         { amenity: 'Rooftop BBQ', time: 'Fri 7:00 PM', price: 45.00, reason: 'High demand forecast' },
     ]
 
+    const handlePolicySave = () => {
+        console.log('sc.agent.pricing.policy_updated', { surface: 'Amenities' });
+    }
+
+    const handleNewExperiment = () => {
+        console.log('sc.agent.pricing.experiment_started', { name: 'New Experiment' });
+    }
+
+    const handleExplanationOpen = (decisionId: string) => {
+        console.log('sc.agent.pricing.explanation_opened', { decisionId });
+    }
+
+
   return (
     <div className="space-y-8">
         <h1 className="text-3xl font-bold text-foreground">Amenity Pricing & Policies</h1>
@@ -58,7 +71,7 @@ export default function PricingPage() {
                         </div>
                     </div>
                     <div className="mt-6 text-right">
-                        <Button className="vx-cta vx-focus">Save Policy</Button>
+                        <Button className="vx-cta vx-focus" onClick={handlePolicySave}>Save Policy</Button>
                     </div>
                 </div>
 
@@ -66,7 +79,7 @@ export default function PricingPage() {
                 <div className="vx-card p-0">
                      <div className="flex justify-between items-center p-6">
                         <h2 className="text-xl font-bold">Pricing Experiments</h2>
-                        <Button variant="outline" className="vx-focus"><Plus className="mr-2"/> New Experiment</Button>
+                        <Button variant="outline" className="vx-focus" onClick={handleNewExperiment}><Plus className="mr-2"/> New Experiment</Button>
                     </div>
                     <div className="overflow-x-auto">
                         <Table>
@@ -83,7 +96,7 @@ export default function PricingPage() {
                                     <TableRow key={exp.id} className="vx-table-row">
                                         <TableCell className="font-medium">{exp.name}</TableCell>
                                         <TableCell>
-                                             <span className={cn("px-2 py-1 text-xs font-semibold rounded-full border", exp.status === 'Active' ? 'chip-info' : 'text-muted-foreground')}>
+                                             <span className={cn("px-2 py-1 text-xs font-semibold rounded-full border", exp.status === 'Active' ? 'text-[var(--neon-2)] border-[var(--neon-2)]/50 bg-[var(--neon-2)]/20' : 'text-muted-foreground')}>
                                                 {exp.status}
                                              </span>
                                         </TableCell>
@@ -104,7 +117,7 @@ export default function PricingPage() {
                 <h2 className="text-xl font-bold mb-4">Decision Feed</h2>
                 <div className="space-y-4">
                     {decisions.map((decision, i) => (
-                         <div key={i} className="p-4 rounded-md border border-border bg-black/20">
+                         <div key={i} className="p-4 rounded-md border border-border bg-black/20" style={{borderLeftColor: 'var(--neon-1)', borderLeftWidth: '3px'}}>
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="font-semibold">{decision.amenity} @ {decision.time}</p>
@@ -114,7 +127,7 @@ export default function PricingPage() {
                                 </div>
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <Button size="sm" variant="ghost" className="chip-info vx-focus">
+                                        <Button size="sm" variant="ghost" className="text-[var(--neon-2)] hover:text-[var(--neon-2)]/80 vx-focus" onClick={() => handleExplanationOpen(`${i}`)}>
                                             Why this price?
                                         </Button>
                                     </DialogTrigger>
@@ -128,7 +141,7 @@ export default function PricingPage() {
                                         </DialogHeader>
                                         <div className="mt-4 text-sm space-y-2">
                                             <p><span className="font-semibold text-primary">Reason:</span> {decision.reason}</p>
-                                            <p>This is a placeholder for a detailed explanation of the pricing logic, including factors like demand, time of day, and active experiments.</p>
+                                            <p className="text-muted-foreground">This is a placeholder for a detailed explanation of the pricing logic, including factors like demand, time of day, and active experiments. Top 5 features and guardrail hits would be listed here.</p>
                                         </div>
                                          <DialogFooter>
                                             <DialogClose asChild>
