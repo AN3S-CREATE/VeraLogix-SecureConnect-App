@@ -1,6 +1,6 @@
 
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Shield, Home, KeyRound, Menu, User, Settings, Plug, ShieldAlert, Wrench, ReceiptText, DollarSign, Zap, MessageSquare, Search, Droplets } from "lucide-react";
+import { Shield, Home, KeyRound, Menu, User, Settings, Plug, ShieldAlert, Wrench, ReceiptText, DollarSign, Zap, MessageSquare, Search, Droplets, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
 import { Button } from "@/components/ui/button";
@@ -42,8 +42,8 @@ export default function CmdLayout({
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Work Orders">
-                <Link href="/cmd/work-orders"><Wrench /><span>Work Orders</span></Link>
+              <SidebarMenuButton asChild tooltip="Maintenance">
+                <Link href="/cmd/maintenance"><Wrench /><span>Maintenance</span></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
@@ -57,13 +57,18 @@ export default function CmdLayout({
               </SidebarMenuButton>
             </SidebarMenuItem>
              <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Energy & Water">
-                <Link href="/cmd/energy"><Droplets /><span>Energy & Water</span></Link>
+              <SidebarMenuButton asChild tooltip="Energy">
+                <Link href="/cmd/energy"><Droplets /><span>Energy</span></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="EV Charging">
                 <Link href="/cmd/ev-charging"><Zap /><span>EV Charging</span></Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Reports">
+                <Link href="/cmd/reports"><BookOpen /><span>Reports</span></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
