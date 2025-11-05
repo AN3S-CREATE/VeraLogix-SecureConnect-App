@@ -19,7 +19,7 @@
     --background: 330 3% 11%; /* Derived from --black */
     --foreground: 0 0% 98%;
     --card: 336 2% 13%;
-    --card-foreground: 0 0_ 98%;
+    --card-foreground: 0 0% 98%;
     --popover: 336 2% 13%;
     --popover-foreground: 0 0% 98%;
     --primary: 78 55% 54%; /* Derived from --g1 */
@@ -135,12 +135,12 @@
   .chip-info{
     background:color-mix(in lch,var(--neon-2) 20%, transparent);
     border:1px solid color-mix(in lch,var(--neon-2) 45%, transparent);
-    color:#203000;
+    color:#E4FF66;
   }
   .chip-alert{
     background:color-mix(in lch,var(--neon-3) 22%, transparent);
     border:1px solid color-mix(in lch,var(--neon-3) 50%, transparent);
-    color:#172000;
+    color:#D4FF00;
   }
   /* Spinner + Dust */
   .vx-spinner{
@@ -201,5 +201,3 @@
     background-color: color-mix(in oklab, var(--neon-2) 10%, transparent);
   }
 }
-
-    
