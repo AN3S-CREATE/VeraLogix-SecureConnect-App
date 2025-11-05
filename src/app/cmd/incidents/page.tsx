@@ -9,18 +9,62 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { FilePlus2, Filter, Download, ShieldAlert } from "lucide-react";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, doc, getDocs, setDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
+import type { Ticket } from "@/lib/entities";
+
+const initialIncidents: Ticket[] = [
+    { id: 'INC-001', unitId: 'unit-1', category: 'Access', desc: 'Unauthorised access attempt on main entrance.', status: 'New', slaDeadline: new Date().toISOString(), timeline: [], severity: 'critical', assignee: 'John Doe', sla: 95 },
+    { id: 'INC-002', unitId: 'unit-2', category: 'Perimeter', desc: 'Perimeter fence breach detected near Sector 4.', status: 'New', slaDeadline: new Date().toISOString(), timeline: [], severity: 'high', assignee: 'Jane Smith', sla: 60 },
+    { id: 'INC-003', unitId: 'unit-3', category: 'CCTV', desc: 'CCTV camera offline in parking garage P2.', status: 'Assigned', slaDeadline: new Date().toISOString(), timeline: [], severity: 'medium', assignee: 'Unassigned', sla: 25 },
+    { id: 'INC-004', unitId: 'unit-4', category: 'Alarms', desc: 'Scheduled fire alarm test failure.', status: 'New', slaDeadline: new Date().toISOString(), timeline: [], severity: 'low', assignee: 'Unassigned', sla: 10 },
+];
 
 export default function IncidentsPage() {
+    const firestore = useFirestore();
+    const ticketsCollection = useMemoFirebase(() => firestore ? collection(firestore, 'tickets') : null, [firestore]);
+    const { data: incidents, isLoading } = useCollection<Ticket>(ticketsCollection);
+    
+    const [selectedIncident, setSelectedIncident] = useState<Ticket | null>(null);
 
-    const incidents = [
-        { id: 'INC-001', severity: 'critical', description: 'Unauthorised access attempt on main entrance.', assignee: 'John Doe', sla: 95 },
-        { id: 'INC-002', severity: 'high', description: 'Perimeter fence breach detected near Sector 4.', assignee: 'Jane Smith', sla: 60 },
-        { id: 'INC-003', severity: 'medium', description: 'CCTV camera offline in parking garage P2.', assignee: 'Unassigned', sla: 25 },
-        { id: 'INC-004', severity: 'low', description: 'Scheduled fire alarm test failure.', assignee: 'Unassigned', sla: 10 },
-    ];
+    // Seed data on initial load if collection is empty
+    useEffect(() => {
+        const seedData = async () => {
+            if (firestore && ticketsCollection) {
+                const snapshot = await getDocs(ticketsCollection);
+                if (snapshot.empty) {
+                    console.log("No incidents found, seeding initial data...");
+                    const promises = initialIncidents.map(incident => {
+                        const incidentDoc = doc(firestore, 'tickets', incident.id);
+                        // a few fields are not in the entity definition, so we remove them
+                        const { sla, assignee, ...rest } = incident;
+                        return setDoc(incidentDoc, rest);
+                    });
+                    await Promise.all(promises);
+                }
+            }
+        };
+        seedData();
+    }, [firestore, ticketsCollection]);
+    
+    // Update selected incident when incidents data changes
+    useEffect(() => {
+        if (incidents && incidents.length > 0) {
+            if (selectedIncident) {
+                // If there's a selected incident, find its updated version in the new data
+                const updatedSelected = incidents.find(i => i.id === selectedIncident.id);
+                setSelectedIncident(updatedSelected || incidents[1]);
+            } else {
+                // Otherwise, default to the second incident
+                setSelectedIncident(incidents[1]);
+            }
+        } else {
+            setSelectedIncident(null);
+        }
+    }, [incidents, selectedIncident?.id]);
 
-    // To test empty state, set selectedIncident to null and incidents to []
-    const selectedIncident = incidents.length > 0 ? incidents[1] : null;
 
     const severityConfig = {
         critical: { label: 'Critical', className: 'bg-red-500/20 text-red-400 border-red-500/50' },
@@ -48,7 +92,11 @@ export default function IncidentsPage() {
                 </div>
 
                 <div className="vx-card p-0 flex-1 overflow-hidden">
-                   {incidents.length > 0 ? (
+                   {isLoading ? (
+                        <div className="h-full flex items-center justify-center">
+                            <Spinner />
+                        </div>
+                   ) : incidents && incidents.length > 0 ? (
                         <div className="overflow-y-auto h-full">
                             <table className="w-full">
                                 <thead>
@@ -62,19 +110,19 @@ export default function IncidentsPage() {
                                 </thead>
                                 <tbody>
                                     {incidents.map((incident) => (
-                                        <tr key={incident.id} className="vx-table-row" data-state={incident.id === selectedIncident?.id ? 'selected' : 'unselected'}>
+                                        <tr key={incident.id} className="vx-table-row" data-state={incident.id === selectedIncident?.id ? 'selected' : 'unselected'} onClick={() => setSelectedIncident(incident)}>
                                             <td className="p-4"><Checkbox id={`select-${incident.id}`} aria-label={`Select incident ${incident.id}`} className="vx-focus" /></td>
                                             <td className="p-4">
-                                                <span className={cn("px-2 py-1 text-xs font-semibold rounded-full border", severityConfig[incident.severity as keyof typeof severityConfig].className)}>
-                                                    {severityConfig[incident.severity as keyof typeof severityConfig].label}
+                                                <span className={cn("px-2 py-1 text-xs font-semibold rounded-full border", severityConfig[incident.severity as keyof typeof severityConfig]?.className)}>
+                                                    {severityConfig[incident.severity as keyof typeof severityConfig]?.label}
                                                 </span>
                                             </td>
-                                            <td className="p-4 max-w-sm truncate">{incident.description}</td>
-                                            <td className="p-4">{incident.assignee}</td>
+                                            <td className="p-4 max-w-sm truncate">{incident.desc}</td>
+                                            <td className="p-4">{incident.assignee || 'Unassigned'}</td>
                                             <td className="p-4">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-8 text-right text-sm">{incident.sla}%</div>
-                                                    <div className={cn("h-2 w-2 rounded-full", incident.sla > 80 ? "bg-neon-3 animate-pulse" : "bg-neon-2")}></div>
+                                                    <div className="w-8 text-right text-sm">{incident.sla || 0}%</div>
+                                                    <div className={cn("h-2 w-2 rounded-full", incident.sla && incident.sla > 80 ? "bg-neon-3 animate-pulse" : "bg-neon-2")}></div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -98,12 +146,12 @@ export default function IncidentsPage() {
                     <>
                         <div>
                             <h2 className="text-xl font-bold">Playbook: {selectedIncident.id}</h2>
-                            <p className="text-muted-foreground text-sm">{selectedIncident.description}</p>
+                            <p className="text-muted-foreground text-sm">{selectedIncident.desc}</p>
                         </div>
 
                         <div className="space-y-4">
                             <h3 className="font-semibold">Assign</h3>
-                             <Select defaultValue={selectedIncident.assignee !== 'Unassigned' ? selectedIncident.assignee : undefined} onValueChange={handleAssign}>
+                             <Select defaultValue={selectedIncident.assignee && selectedIncident.assignee !== 'Unassigned' ? selectedIncident.assignee : undefined} onValueChange={handleAssign}>
                                 <SelectTrigger className="w-full vx-focus">
                                     <SelectValue placeholder="Select an assignee" />
                                 </SelectTrigger>

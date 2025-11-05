@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -100,7 +101,8 @@
         "media": { "type": "array", "items": { "type": "string" }, "description": "Attached media file identifiers." },
         "status": { "type": "string", "description": "Current status of the ticket." },
         "slaDeadline": { "type": "string", "format": "date-time", "description": "SLA deadline for resolution." },
-        "timeline": { "type": "array", "items": { "type": "string" }, "description": "Timeline of events for the ticket." }
+        "timeline": { "type": "array", "items": { "type": "string" }, "description": "Timeline of events for the ticket." },
+        "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"], "description": "Severity of the ticket" }
       },
       "required": ["id", "unitId", "category", "desc", "status", "slaDeadline", "timeline"]
     },
@@ -238,3 +240,5 @@
     ]
   }
 }
+
+    
