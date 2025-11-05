@@ -89,13 +89,14 @@ export default function VenDashboardPage() {
                             <div className="flex gap-2 mt-4 sm:mt-0">
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <Button size="sm" variant="outline" className="vx-focus"><UserPlus /> Issue Crew Pass</Button>
+                                        <Button size="sm" variant="outline" className="vx-focus" disabled={window.status !== 'approved'}><UserPlus /> Issue Crew Pass</Button>
                                     </DialogTrigger>
-                                    <DialogContent className="sm:max-w-xs bg-black">
-                                        <div className="absolute inset-0 bg-black/80" />
-                                        <div className="relative z-10 flex flex-col items-center gap-4 p-4 text-center">
+                                     <DialogContent className="sm:max-w-xs bg-black p-0 border-0">
+                                        <div className="relative z-10 flex flex-col items-center gap-4 p-8 text-center">
                                             <h2 className="text-lg font-bold">Crew Pass: John Smith</h2>
-                                            <QrCode className="w-48 h-48 text-white"/>
+                                            <div className="bg-white p-2 rounded-md">
+                                                <QrCode className="w-48 h-48 text-black"/>
+                                            </div>
                                             <p className="text-sm text-muted-foreground">Valid: {window.start} - {window.end}</p>
                                             <Button className="w-full vx-cta vx-focus"><Share2 /> Share Pass</Button>
                                         </div>
