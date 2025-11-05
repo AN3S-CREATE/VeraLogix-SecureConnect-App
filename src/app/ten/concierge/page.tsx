@@ -34,7 +34,7 @@ export default function TenConciergePage() {
         </div>
         <ScrollArea>
           {threads.map(thread => (
-            <div key={thread.id} className={`p-4 border-b border-border cursor-pointer hover:bg-muted/50 ${thread.id === 1 ? "bg-muted/50" : ""}`}>
+            <div key={thread.id} className={`p-4 border-b border-border cursor-pointer hover:bg-muted/50 ${thread.id === 1 ? "bg-muted/50" : ""}`} id={thread.id === 1 ? 'thread' : undefined}>
               <div className="flex justify-between items-start">
                 <p className="font-semibold">{thread.topic}</p>
                 {thread.unread && <div className="w-2 h-2 rounded-full bg-neon-1 mt-1.5"></div>}
