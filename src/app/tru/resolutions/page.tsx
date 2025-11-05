@@ -41,10 +41,12 @@ export default function ResolutionsPage() {
     }
 
     const handleVote = (choice: 'approve' | 'decline') => {
+        if (!selectedResolution) return;
         console.log('sc.trust.resolutions.voted', { resolutionId: selectedResolution.id, choice });
     }
 
     const handleSign = () => {
+        if (!selectedResolution) return;
         console.log('sc.trust.resolutions.signed', { resolutionId: selectedResolution.id });
     }
 
