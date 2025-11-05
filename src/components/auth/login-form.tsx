@@ -40,7 +40,7 @@ const profileRoutes: Record<string, string> = {
     "Agent": "/cmd",
     "Resident": "/ten/home",
     "Trustee": "/tru/overview",
-    "Vendor": "/ven/dashboard",
+    "Vendor": "/ven/onboarding",
     "Estate Manager": "/cmd"
 };
 
@@ -206,3 +206,5 @@ export function LoginForm() {
     </div>
   );
 }
+
+    
