@@ -15,13 +15,6 @@ import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import type { Ticket } from "@/lib/entities";
 
-const initialIncidents: Ticket[] = [
-    { id: 'INC-001', unitId: 'unit-1', category: 'Access', desc: 'Unauthorised access attempt on main entrance.', status: 'New', slaDeadline: new Date().toISOString(), timeline: [], severity: 'critical', assignee: 'John Doe', sla: 95 },
-    { id: 'INC-002', unitId: 'unit-2', category: 'Perimeter', desc: 'Perimeter fence breach detected near Sector 4.', status: 'New', slaDeadline: new Date().toISOString(), timeline: [], severity: 'high', assignee: 'Jane Smith', sla: 60 },
-    { id: 'INC-003', unitId: 'unit-3', category: 'CCTV', desc: 'CCTV camera offline in parking garage P2.', status: 'Assigned', slaDeadline: new Date().toISOString(), timeline: [], severity: 'medium', assignee: 'Unassigned', sla: 25 },
-    { id: 'INC-004', unitId: 'unit-4', category: 'Alarms', desc: 'Scheduled fire alarm test failure.', status: 'New', slaDeadline: new Date().toISOString(), timeline: [], severity: 'low', assignee: 'Unassigned', sla: 10 },
-];
-
 export default function IncidentsPage() {
     const firestore = useFirestore();
     const ticketsCollection = useMemoFirebase(() => firestore ? collection(firestore, 'tickets') : null, [firestore]);
@@ -29,40 +22,22 @@ export default function IncidentsPage() {
     
     const [selectedIncident, setSelectedIncident] = useState<Ticket | null>(null);
 
-    // Seed data on initial load if collection is empty
-    useEffect(() => {
-        const seedData = async () => {
-            if (firestore && ticketsCollection) {
-                const snapshot = await getDocs(ticketsCollection);
-                if (snapshot.empty) {
-                    console.log("No incidents found, seeding initial data...");
-                    const promises = initialIncidents.map(incident => {
-                        const incidentDoc = doc(firestore, 'tickets', incident.id);
-                        return setDoc(incidentDoc, incident);
-                    });
-                    await Promise.all(promises);
-                }
-            }
-        };
-        seedData();
-    }, [firestore, ticketsCollection]);
-    
     // Update selected incident when incidents data changes
     useEffect(() => {
         if (incidents && incidents.length > 0) {
             if (selectedIncident) {
                 // If there's a selected incident, find its updated version in the new data
                 const updatedSelected = incidents.find(i => i.id === selectedIncident.id);
-                setSelectedIncident(updatedSelected || incidents[1]);
+                setSelectedIncident(updatedSelected || incidents[0]);
             } else {
-                // Otherwise, default to the second incident
-                setSelectedIncident(incidents[1]);
+                // Otherwise, default to the first incident
+                setSelectedIncident(incidents[0]);
             }
         } else if (!isLoading) {
             // If there are no incidents and we are not loading, clear the selection
             setSelectedIncident(null);
         }
-    }, [incidents, isLoading]);
+    }, [incidents, isLoading, selectedIncident]);
 
 
     const severityConfig = {

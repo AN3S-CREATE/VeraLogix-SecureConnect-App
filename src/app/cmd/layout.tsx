@@ -4,6 +4,7 @@ import { Shield, Home, KeyRound, Menu, User, Settings, Plug, ShieldAlert, Wrench
 import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
 import { Button } from "@/components/ui/button";
+import { OfflineIndicator } from "@/components/ui/offline-indicator";
 
 export default function CmdLayout({
   children,
@@ -110,6 +111,7 @@ export default function CmdLayout({
                 <p className="text-sm text-muted-foreground">User Menu</p>
             </div>
         </header>
+        <OfflineIndicator />
         <main className="p-4 sm:p-6 lg:p-8">
             {children}
         </main>
