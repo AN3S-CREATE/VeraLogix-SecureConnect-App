@@ -20,24 +20,38 @@ export default function IncidentsPage() {
     const ticketsCollection = useMemoFirebase(() => firestore ? collection(firestore, 'tickets') : null, [firestore]);
     const { data: incidents, isLoading } = useCollection<Ticket>(ticketsCollection);
     
-    const [selectedIncident, setSelectedIncident] = useState<Ticket | null>(null);
+    // Initial mock data for demo purposes, will be replaced by Firestore data when available
+    const initialIncidents: Ticket[] = [
+        { id: 'INC-001', unitId: 'Lobby', category: 'Access', desc: 'Unauthorised access attempt on main entrance.', status: 'New', slaDeadline: '2024-08-01T12:00:00Z', timeline: [], severity: 'high', assignee: 'Unassigned', sla: 95 },
+        { id: 'INC-002', unitId: 'Sector 4', category: 'Perimeter', desc: 'Perimeter fence breach detected near Sector 4.', status: 'Assigned', slaDeadline: '2024-08-01T11:00:00Z', timeline: [], severity: 'critical', assignee: 'John Doe', sla: 80 },
+        { id: 'INC-003', unitId: 'Garage P2', category: 'CCTV', desc: 'CCTV camera offline in parking garage P2.', status: 'New', slaDeadline: '2024-08-02T18:00:00Z', timeline: [], severity: 'medium', assignee: 'Unassigned', sla: 100 },
+        { id: 'INC-004', unitId: 'Unit 301', category: 'Alarm', desc: 'False fire alarm triggered.', status: 'Closed', slaDeadline: '2024-07-31T10:00:00Z', timeline: [], severity: 'low', assignee: 'Jane Smith', sla: 100 },
+    ];
+    
+    const [displayData, setDisplayData] = useState<Ticket[]>(initialIncidents);
+    const [selectedIncident, setSelectedIncident] = useState<Ticket | null>(initialIncidents[0] || null);
 
-    // Update selected incident when incidents data changes
     useEffect(() => {
+        // Once Firestore data loads, it replaces the initial mock data.
+        // For a pure demo, you might want to always show mock data.
         if (incidents && incidents.length > 0) {
+            setDisplayData(incidents);
+        }
+    }, [incidents]);
+
+    // Update selected incident when display data changes
+    useEffect(() => {
+        if (displayData && displayData.length > 0) {
             if (selectedIncident) {
-                // If there's a selected incident, find its updated version in the new data
-                const updatedSelected = incidents.find(i => i.id === selectedIncident.id);
-                setSelectedIncident(updatedSelected || incidents[0]);
+                const updatedSelected = displayData.find(i => i.id === selectedIncident.id);
+                setSelectedIncident(updatedSelected || displayData[0]);
             } else {
-                // Otherwise, default to the first incident
-                setSelectedIncident(incidents[0]);
+                setSelectedIncident(displayData[0]);
             }
         } else if (!isLoading) {
-            // If there are no incidents and we are not loading, clear the selection
             setSelectedIncident(null);
         }
-    }, [incidents, isLoading, selectedIncident?.id]);
+    }, [displayData, isLoading, selectedIncident?.id]);
 
 
     const severityConfig = {
@@ -66,11 +80,11 @@ export default function IncidentsPage() {
                 </div>
 
                 <div className="vx-card p-0 flex-1 overflow-hidden">
-                   {isLoading ? (
+                   {isLoading && (!displayData || displayData.length === 0) ? (
                         <div className="h-full flex items-center justify-center">
                             <Spinner />
                         </div>
-                   ) : incidents && incidents.length > 0 ? (
+                   ) : displayData && displayData.length > 0 ? (
                         <div className="overflow-y-auto h-full">
                             <table className="w-full">
                                 <thead>
@@ -83,7 +97,7 @@ export default function IncidentsPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {incidents.map((incident) => (
+                                    {displayData.map((incident) => (
                                         <tr key={incident.id} className="vx-table-row" data-state={incident.id === selectedIncident?.id ? 'selected' : 'unselected'} onClick={() => setSelectedIncident(incident)}>
                                             <td className="p-4"><Checkbox id={`select-${incident.id}`} aria-label={`Select incident ${incident.id}`} className="vx-focus" /></td>
                                             <td className="p-4">
@@ -216,3 +230,5 @@ export default function IncidentsPage() {
         </div>
     );
 }
+
+    
