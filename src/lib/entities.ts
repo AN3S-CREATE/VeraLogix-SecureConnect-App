@@ -60,7 +60,6 @@ export type Ticket = {
     slaDeadline: string;
     timeline: string[];
     severity?: 'critical' | 'high' | 'medium' | 'low';
-    // The following are not in backend.json but used in the UI
     assignee?: string;
     sla?: number;
 };

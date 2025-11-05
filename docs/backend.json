@@ -102,7 +102,9 @@
         "status": { "type": "string", "description": "Current status of the ticket." },
         "slaDeadline": { "type": "string", "format": "date-time", "description": "SLA deadline for resolution." },
         "timeline": { "type": "array", "items": { "type": "string" }, "description": "Timeline of events for the ticket." },
-        "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"], "description": "Severity of the ticket" }
+        "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"], "description": "Severity of the ticket" },
+        "assignee": { "type": "string", "description": "The user assigned to handle the ticket." },
+        "sla": { "type": "number", "description": "SLA compliance percentage for the ticket." }
       },
       "required": ["id", "unitId", "category", "desc", "status", "slaDeadline", "timeline"]
     },
@@ -240,5 +242,3 @@
     ]
   }
 }
-
-    

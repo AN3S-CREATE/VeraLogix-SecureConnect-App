@@ -38,9 +38,7 @@ export default function IncidentsPage() {
                     console.log("No incidents found, seeding initial data...");
                     const promises = initialIncidents.map(incident => {
                         const incidentDoc = doc(firestore, 'tickets', incident.id);
-                        // a few fields are not in the entity definition, so we remove them
-                        const { sla, assignee, ...rest } = incident;
-                        return setDoc(incidentDoc, rest);
+                        return setDoc(incidentDoc, incident);
                     });
                     await Promise.all(promises);
                 }
@@ -243,4 +241,3 @@ export default function IncidentsPage() {
     );
 }
 
-    
