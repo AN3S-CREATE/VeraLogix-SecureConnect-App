@@ -11,28 +11,30 @@
     --g2: #BAD96B;
     --g3: #7D9C33;
     --g4: #455C08;
-    --neon-1: #B6FF2E;
-    --neon-2: #E4FF66;
-    --neon-3: #D4FF00;
-    --background: 330 3% 11%;
+    --neon-1: #B6FF2E; /* focus/links/highlights */
+    --neon-2: #E4FF66; /* chips/info */
+    --neon-3: #D4FF00; /* alerts/callouts */
+
+    /* ShadCN Theme Variables - mapped to brand tokens */
+    --background: 330 3% 11%; /* Derived from --black */
     --foreground: 0 0% 98%;
     --card: 336 2% 13%;
-    --card-foreground: 0 0% 98%;
+    --card-foreground: 0 0_ 98%;
     --popover: 336 2% 13%;
     --popover-foreground: 0 0% 98%;
-    --primary: 78 55% 54%;
+    --primary: 78 55% 54%; /* Derived from --g1 */
     --primary-foreground: 78 55% 10%;
-    --secondary: 78 40% 30%;
+    --secondary: 78 40% 30%; /* Derived from --g3 */
     --secondary-foreground: 0 0% 98%;
     --muted: 330 3% 25%;
     --muted-foreground: 0 0% 63%;
-    --accent: 78 55% 54%;
+    --accent: 78 55% 54%; /* Derived from --g1 */
     --accent-foreground: 78 55% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 78 55% 54% / 0.25;
+    --border: 78 55% 54% / 0.25; /* Derived from --g1 */
     --input: 330 3% 25%;
-    --ring: 75 92% 58%;
+    --ring: 75 92% 58%; /* Derived from --neon-1 */
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -48,6 +50,7 @@
     --sidebar-border: 330 3% 25%;
     --sidebar-ring: 80 100% 59%;
   }
+
   .dark {
     --background: 330 3% 11%;
     --foreground: 0 0% 98%;
@@ -103,13 +106,13 @@
   
   /* Cards */
   .vx-card{
-    background:linear-gradient(180deg,rgba(182,255,46,.12),rgba(69,92,8,.04)),var(--black);
+    background:linear-gradient(180deg,rgba(168,207,69,.08),rgba(69,92,8,.04)),var(--black);
     border:1px solid rgba(168,207,69,.25);
     border-radius:20px;
     box-shadow:0 0 0 1px color-mix(in lch,var(--neon-2) 18%, transparent) inset,0 10px 30px rgba(0,0,0,.35)
   }
   .vx-card:hover{
-    box-shadow:0 0 24px rgba(182,255,46,.45),0 0 6px color-mix(in lch,var(--neon-2) 35%, transparent) inset
+    box-shadow:0 0 24px color-mix(in lch,var(--neon-1) 45%, transparent),0 0 6px color-mix(in lch,var(--neon-2) 35%, transparent) inset
   }
   
   /* Primary CTA */
@@ -117,13 +120,8 @@
     background:linear-gradient(90deg,var(--g1),var(--g2),var(--g3));
     color:#1a1a1a;
     font-weight:700;
-    border-radius:12px;padding:.875rem 1.25rem
-  }
-  .vx-cta:focus-visible{
-    outline: none;
-    box-shadow: 0 0 0 2px var(--neon-1),
-                0 0 0 5px color-mix(in oklab, var(--neon-1) 35%, transparent),
-                0 0 40px rgba(212,255,0,.35);
+    border-radius:12px;
+    padding:.875rem 1.25rem
   }
   .vx-cta:disabled {
     opacity: 0.5;
@@ -203,3 +201,5 @@
     background-color: color-mix(in oklab, var(--neon-2) 10%, transparent);
   }
 }
+
+    
