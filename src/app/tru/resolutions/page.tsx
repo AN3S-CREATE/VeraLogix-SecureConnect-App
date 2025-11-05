@@ -36,6 +36,18 @@ export default function ResolutionsPage() {
         { user: "EF", text: "Seconding CD's comment. The increase seems steep.", time: "30m ago" },
     ];
 
+    const handleCreate = () => {
+        console.log('sc.trust.resolutions.created', { id: 'RES-2024-05' });
+    }
+
+    const handleVote = (choice: 'approve' | 'decline') => {
+        console.log('sc.trust.resolutions.voted', { resolutionId: selectedResolution.id, choice });
+    }
+
+    const handleSign = () => {
+        console.log('sc.trust.resolutions.signed', { resolutionId: selectedResolution.id });
+    }
+
     return (
          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-8rem)]">
             <style jsx global>{`
@@ -72,7 +84,7 @@ export default function ResolutionsPage() {
                             <Textarea placeholder="Write the full text of the resolution here..." className="vx-focus min-h-[200px]" />
                             <DialogFooter>
                                 <Button variant="secondary">Cancel</Button>
-                                <Button className="vx-cta">Submit for Review</Button>
+                                <Button className="vx-cta" onClick={handleCreate}>Submit for Review</Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
@@ -123,10 +135,10 @@ export default function ResolutionsPage() {
                             <Progress value={selectedResolution.quorum} className="h-2 [&>div]:bg-neon-2" />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <Button className="w-full bg-primary/20 text-primary border border-primary/50 hover:bg-primary/30 h-12 text-lg vx-focus">
+                            <Button className="w-full bg-primary/20 text-primary border border-primary/50 hover:bg-primary/30 h-12 text-lg vx-focus" onClick={() => handleVote('approve')}>
                                 <ThumbsUp className="mr-2" />Approve
                             </Button>
-                            <Button className="w-full bg-destructive/20 text-destructive-foreground border border-destructive/50 hover:bg-destructive/30 h-12 text-lg vx-focus">
+                            <Button className="w-full bg-destructive/20 text-destructive-foreground border border-destructive/50 hover:bg-destructive/30 h-12 text-lg vx-focus" onClick={() => handleVote('decline')}>
                                 <ThumbsDown className="mr-2" />Decline
                             </Button>
                         </div>
@@ -159,7 +171,7 @@ export default function ResolutionsPage() {
                     <div className="aspect-[3/1] w-full bg-black/20 rounded-md border border-border flex items-center justify-center text-muted-foreground signature-pad" tabIndex={0}>
                         <p>Sign here to ratify the passed resolution</p>
                     </div>
-                     <Button className="w-full vx-cta vx-focus" disabled={selectedResolution.status !== 'Passed'}>
+                     <Button className="w-full vx-cta vx-focus" disabled={selectedResolution.status !== 'Passed'} onClick={handleSign}>
                         <Check className="mr-2" /> Ratify Resolution
                     </Button>
                 </div>
