@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { FilePlus2, Filter, Download, ShieldAlert } from "lucide-react";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, doc, getDocs, setDoc } from "firebase/firestore";
+import { collection } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import type { Ticket } from "@/lib/entities";
