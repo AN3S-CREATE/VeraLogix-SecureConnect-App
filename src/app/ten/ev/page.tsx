@@ -4,8 +4,11 @@
 import { Button } from "@/components/ui/button";
 import { Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function TenEvPage() {
+  const { toast } = useToast();
+
   const bays = [
     { id: 1, status: 'available' },
     { id: 2, status: 'charging' },
@@ -17,6 +20,17 @@ export default function TenEvPage() {
 
   const handleStopCharging = () => {
     console.log('sc.agent.ev.session_stopped', { bayId: 2, reason: 'user_request' });
+    toast({
+        title: "Charging Stopped",
+        description: "Your EV charging session has been stopped.",
+    });
+  };
+
+  const handleReserve = () => {
+    toast({
+        title: "Bay Reserved",
+        description: "Charging bay has been reserved for 15 minutes.",
+    });
   };
 
   return (
@@ -58,7 +72,7 @@ export default function TenEvPage() {
                 backgroundColor: 'color-mix(in lch, var(--neon-3) 20%, transparent)'
             }}
            >
-                Charging will complete at 80%
+                Charging will complete at 80% to preserve battery health.
            </div>
         </div>
       ) : (
@@ -73,22 +87,23 @@ export default function TenEvPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {bays.map(bay => {
             const isAvailable = bay.status === 'available';
+            const isCharging = bay.status === 'charging';
             return (
               <div 
                 key={bay.id} 
                 className={cn(
                     "vx-card p-4 text-center space-y-2", 
-                    !isAvailable && "opacity-50",
+                    !isAvailable && !isCharging && "opacity-50",
                     isAvailable && "border-neon-1/50"
                 )}
                 style={isAvailable ? {
                     boxShadow: '0 0 24px rgba(182,255,46,.45), 0 0 6px color-mix(in oklab,var(--neon-1) 35%, transparent) inset'
                 } : {}}
               >
-                <Zap className={cn("mx-auto h-8 w-8", bay.status === 'charging' ? 'text-primary animate-pulse' : 'text-muted-foreground')} />
+                <Zap className={cn("mx-auto h-8 w-8", isCharging ? 'text-primary animate-pulse' : 'text-muted-foreground', isAvailable && 'text-primary')} />
                 <p className="font-semibold">Bay {bay.id}</p>
                 <p className={cn("text-sm capitalize", isAvailable ? 'delta-positive' : 'text-muted-foreground')}>{bay.status}</p>
-                <Button size="sm" className="w-full vx-cta vx-focus" disabled={!isAvailable}>Reserve</Button>
+                <Button size="sm" className="w-full vx-cta vx-focus" disabled={!isAvailable} onClick={handleReserve}>Reserve</Button>
               </div>
             )
           })}
