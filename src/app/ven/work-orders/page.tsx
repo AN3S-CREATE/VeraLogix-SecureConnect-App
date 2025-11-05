@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -9,9 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { Barcode, Calendar, CheckSquare, GripVertical, ImagePlus, ListTodo, Plus, Signature, Trash, Users, Download } from "lucide-react";
+import { Barcode, Calendar, CheckSquare, GripVertical, ImagePlus, ListTodo, Plus, Signature, Trash, Users, Download, Wrench } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function VenWorkOrdersPage() {
   const workOrders = [
@@ -20,7 +22,12 @@ export default function VenWorkOrdersPage() {
     { id: "WO-003", title: "Jammed security gate", priority: "High", status: "In Progress", site: "Oceanview Towers" },
   ];
 
-  const [selectedWorkOrder, setSelectedWorkOrder] = useState(workOrders[0]);
+  // Set to empty array to test empty state
+  const [data, setData] = useState(workOrders); 
+  // Set to true to test loading state
+  const [isLoading, setIsLoading] = useState(false); 
+
+  const [selectedWorkOrder, setSelectedWorkOrder] = useState(data[0]);
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
 
   const priorityConfig = {
@@ -40,26 +47,40 @@ export default function VenWorkOrdersPage() {
       {/* Work Orders List */}
       <div className="lg:col-span-1 flex flex-col">
         <h1 className="text-3xl font-bold text-foreground mb-6">Work Orders</h1>
-        <ScrollArea className="flex-1 -mr-4 pr-4">
-          <div className="space-y-4">
-            {workOrders.map((wo) => (
-              <div
-                key={wo.id}
-                className={cn("vx-card p-4 cursor-pointer", selectedWorkOrder?.id === wo.id && "border-neon-1/50 shadow-[0_0_12px_rgba(182,255,46,.25)]")}
-                onClick={() => setSelectedWorkOrder(wo)}
-              >
-                <div className="flex justify-between items-start">
-                  <p className="font-bold text-foreground">{wo.id}</p>
-                  <span className={cn("px-2 py-1 text-xs font-semibold rounded-full border", priorityConfig[wo.priority as keyof typeof priorityConfig].className)}>
-                    {priorityConfig[wo.priority as keyof typeof priorityConfig].label}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">{wo.title}</p>
-                <p className="text-xs text-muted-foreground mt-2">{wo.status} @ {wo.site}</p>
+        <div className="flex-1">
+          {isLoading ? (
+            <div className="h-full flex items-center justify-center">
+              <Spinner />
+            </div>
+          ) : data.length > 0 ? (
+            <ScrollArea className="h-full -mr-4 pr-4">
+              <div className="space-y-4">
+                {data.map((wo) => (
+                  <div
+                    key={wo.id}
+                    className={cn("vx-card p-4 cursor-pointer", selectedWorkOrder?.id === wo.id && "border-neon-1/50 shadow-[0_0_12px_rgba(182,255,46,.25)]")}
+                    onClick={() => setSelectedWorkOrder(wo)}
+                  >
+                    <div className="flex justify-between items-start">
+                      <p className="font-bold text-foreground">{wo.id}</p>
+                      <span className={cn("px-2 py-1 text-xs font-semibold rounded-full border", priorityConfig[wo.priority as keyof typeof priorityConfig].className)}>
+                        {priorityConfig[wo.priority as keyof typeof priorityConfig].label}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">{wo.title}</p>
+                    <p className="text-xs text-muted-foreground mt-2">{wo.status} @ {wo.site}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </ScrollArea>
+            </ScrollArea>
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground border-2 border-dashed rounded-lg">
+                <Wrench className="w-12 h-12 mb-2" />
+                <h3 className="font-semibold text-foreground">No Work Orders</h3>
+                <p className="text-sm">New work orders will appear here.</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Job Plan & Handover */}

@@ -49,14 +49,14 @@ export function KpiTile({ title, value, status, link }: KpiTileProps) {
 
   if (link) {
     return (
-        <Link href={link} className="vx-card p-4 flex flex-col justify-between h-36 group" style={cardGlowStyle}>
+        <Link href={link} className="vx-card p-4 flex flex-col justify-between h-36 group vx-focus" style={cardGlowStyle}>
             {cardContent}
         </Link>
     );
   }
 
   return (
-    <div className="vx-card p-4 flex flex-col justify-between h-36" style={cardGlowStyle}>
+    <div className="vx-card p-4 flex flex-col justify-between h-36 vx-focus" style={cardGlowStyle} tabIndex={0}>
       {cardContent}
     </div>
   );
