@@ -1,3 +1,4 @@
+
 "use client";
 
 import { ArrowUp, ArrowDown, Download, MoreVertical } from "lucide-react";
@@ -123,7 +124,7 @@ export default function FinancialsPage() {
                                 <TableCell className="font-medium">{item.category}</TableCell>
                                 <TableCell className="text-right">{item.budget.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</TableCell>
                                 <TableCell className="text-right">{item.actual.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</TableCell>
-                                <TableCell className={cn("text-right", item.variance > 0 ? "text-red-400" : item.variance < 0 ? "text-green-400" : "text-muted-foreground")}>
+                                <TableCell className={cn("text-right", item.variance > 0 ? "delta-negative" : item.variance < 0 ? "delta-positive" : "text-muted-foreground")}>
                                     {item.variance.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                                 </TableCell>
                             </TableRow>

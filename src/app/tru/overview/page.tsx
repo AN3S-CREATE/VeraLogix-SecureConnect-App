@@ -1,131 +1,182 @@
 
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { LinkIcon, Building, ArrowRight } from "lucide-react";
-import Image from "next/image";
+import { ArrowUp, ArrowDown, Download } from "lucide-react";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts"
+
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 
-export default function TruOverviewPage() {
-  const trustImage = PlaceHolderImages.find(p => p.id === 'trust-background');
-  const router = useRouter();
-  const { toast } = useToast();
+const cashflowData = [
+  { month: 'Jan', income: 4000, expenses: 2400 },
+  { month: 'Feb', income: 3000, expenses: 1398 },
+  { month: 'Mar', income: 2000, expenses: 9800 },
+  { month: 'Apr', income: 2780, expenses: 3908 },
+  { month: 'May', income: 1890, expenses: 4800 },
+  { month: 'Jun', income: 2390, expenses: 3800 },
+];
 
-  useEffect(() => {
-    console.log('sc.trust.overview.loaded');
-  }, []);
+const budgetData = [
+    { category: "Maintenance", budget: 5000, actual: 4500, variance: -500 },
+    { category: "Utilities", budget: 3000, actual: 3200, variance: 200 },
+    { category: "Security", budget: 7000, actual: 6500, variance: -500 },
+    { category: "Admin", budget: 2500, actual: 2500, variance: 0 },
+]
 
-  const handleLink = () => {
-    toast({
-      title: "Verification Submitted",
-      description: "Your holdings are being verified. You will now be redirected to your dashboard.",
-    });
-    // In a real app, you'd wait for a response before redirecting
-    setTimeout(() => {
-        router.push('/tru/security');
-    }, 2000);
-  }
+export default function FinancialsPage() {
+
+    useEffect(() => {
+        console.log('sc.trust.overview.loaded');
+    }, []);
+
+    const handleExport = () => {
+        console.log('sc.trust.export.triggered');
+    }
 
   return (
     <div className="space-y-8">
-        <h1 className="text-3xl font-bold text-foreground">Portfolio Overview</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-foreground">Portfolio Performance</h1>
+        <Button variant="outline" className="vx-focus" onClick={handleExport}><Download className="mr-2" /> Export Report</Button>
+      </div>
+      
+      {/* KPI Rail */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <KpiCard title="Net Operating Income" value="$1.2M" trend="+5.2%" trendDirection="positive" />
+        <KpiCard title="Arrears (30+ days)" value="$45,210" trend="+2.1%" trendDirection="negative" />
+        <KpiCard title="Budget Variance" value="-$5,800" trend="-1.5%" trendDirection="negative" />
+      </div>
 
-        <div className="relative min-h-[400px] w-full flex items-center justify-center p-4 rounded-lg overflow-hidden">
-            {trustImage && (
-                <Image
-                    src={trustImage.imageUrl}
-                    alt={trustImage.description}
-                    fill
-                    quality={100}
-                    className="object-cover"
-                    data-ai-hint={trustImage.imageHint}
-                />
-            )}
-            <div className="absolute inset-0 bg-black/60" />
-            <div className="relative z-10 w-full max-w-2xl text-center">
-                <div className="vx-card p-8 md:p-12">
-                    <Building className="mx-auto h-16 w-16 text-primary mb-4" />
-                    <h2 className="text-3xl md:text-4xl font-bold text-foreground">Link Your Holdings</h2>
-                    <p className="mt-4 text-lg text-muted-foreground">
-                        To get started, link your property holdings to your VeraLogix account using an invite code or deed verification number.
-                    </p>
-                    <div className="mt-8">
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button className="w-full max-w-sm vx-cta vx-focus text-lg">
-                                    <LinkIcon className="mr-2" />
-                                    Link Ownership
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[480px] bg-background border-white/10">
-                                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[var(--neon-2)] to-transparent"></div>
-                                <DialogHeader>
-                                <DialogTitle>Link Ownership</DialogTitle>
-                                <DialogDescription>
-                                    Enter your invite code or deed verification number below.
-                                </DialogDescription>
-                                </DialogHeader>
-                                <div className="grid gap-4 py-4">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="link-code">Invite Code or Deed #</Label>
-                                    <Input id="link-code" placeholder="Enter code" className="vx-focus" />
-                                </div>
-                                </div>
-                                <DialogFooter>
-                                    <DialogClose asChild>
-                                        <Button variant="secondary">Cancel</Button>
-                                    </DialogClose>
-                                    <DialogClose asChild>
-                                        <Button className="vx-cta" onClick={handleLink}>Submit for Verification</Button>
-                                    </DialogClose>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-                    </div>
-                    <p className="mt-6 text-sm text-muted-foreground">
-                        Need assistance? <a href="#" className="font-semibold text-primary hover:underline">Contact support</a>.
-                    </p>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        {/* Cashflow Chart */}
+        <div className="lg:col-span-3">
+             <Card className="vx-card">
+                <CardHeader>
+                    <CardTitle>Cash Flow</CardTitle>
+                    <CardDescription>Last 6 Months</CardDescription>
+                </CardHeader>
+                <CardContent className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={cashflowData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                             <defs>
+                                <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                                </linearGradient>
+                                <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.8}/>
+                                <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0}/>
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
+                            <XAxis dataKey="month" tickLine={false} axisLine={false} />
+                            <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `$${Number(value)/1000}k`} />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'hsl(var(--background))',
+                                    borderColor: 'hsl(var(--border))',
+                                }}
+                            />
+                            <Legend />
+                            <Area type="monotone" dataKey="income" stroke="hsl(var(--primary))" fill="url(#colorIncome)" />
+                            <Area type="monotone" dataKey="expenses" stroke="hsl(var(--destructive))" fill="url(#colorExpenses)" />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+        </div>
+
+        {/* Insight Rail */}
+        <div className="lg:col-span-2 space-y-4">
+            <h2 className="text-xl font-semibold">Insights</h2>
+            <div className="space-y-3">
+                <div className="p-3 rounded-md border border-[var(--neon-2)]/50 bg-[var(--neon-2)]/20 text-sm">
+                    <span className="font-semibold text-[var(--neon-2)]">Positive Variance:</span> Maintenance budget is underspent by 10%.
+                </div>
+                <div className="p-3 rounded-md border border-[var(--neon-3)]/50 bg-[var(--neon-3)]/20 text-sm">
+                    <span className="font-semibold text-[var(--neon-3)]">Action Required:</span> Utility costs are 7% over budget.
+                </div>
+                 <div className="p-3 rounded-md border border-[var(--neon-2)]/50 bg-[var(--neon-2)]/20 text-sm">
+                     <span className="font-semibold text-[var(--neon-2)]">Opportunity:</span> EV charging revenue is up 15% month-over-month.
                 </div>
             </div>
         </div>
-
-        <div className="vx-card p-6">
-            <h2 className="text-xl font-bold mb-4">Linked Holdings</h2>
-            <div className="space-y-4">
-                <div className="flex justify-between items-center p-4 rounded-md border border-border">
-                    <div>
-                        <p className="font-semibold">The Grand Regency</p>
-                        <p className="text-sm text-muted-foreground">123 Luxury Ave, Metropolis</p>
-                    </div>
-                    <Button asChild variant="outline" size="sm" className="vx-focus">
-                        <Link href="/tru/security">View Dashboard <ArrowRight className="ml-2" /></Link>
-                    </Button>
-                </div>
-                 <div className="flex justify-between items-center p-4 rounded-md border border-border opacity-60">
-                    <div>
-                        <p className="font-semibold">Oceanview Towers</p>
-                        <p className="text-sm text-muted-foreground">456 Shoreline Dr, Coast City</p>
-                    </div>
-                    <Button variant="outline" size="sm" className="vx-focus" disabled>Verification Pending</Button>
-                </div>
+      </div>
+      
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Budget vs. Actual</h2>
+         <div className="vx-card p-0">
+            <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Category</TableHead>
+                            <TableHead className="text-right">Budget</TableHead>
+                            <TableHead className="text-right">Actual</TableHead>
+                            <TableHead className="text-right">Variance</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {budgetData.map((item) => (
+                            <TableRow key={item.category} className="vx-table-row">
+                                <TableCell className="font-medium">{item.category}</TableCell>
+                                <TableCell className="text-right">{item.budget.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</TableCell>
+                                <TableCell className="text-right">{item.actual.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</TableCell>
+                                <TableCell className={cn("text-right", item.variance > 0 ? "delta-negative" : item.variance < 0 ? "delta-positive" : "text-muted-foreground")}>
+                                    {item.variance.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
             </div>
         </div>
+      </div>
+
     </div>
   );
+}
+
+function KpiCard({ title, value, trend, trendDirection }: { title: string, value: string, trend: string, trendDirection: 'positive' | 'negative' | 'neutral' }) {
+  return (
+    <div className="p-6 vx-card">
+      <p className="text-sm text-foreground/80">{title}</p>
+      <p className="text-4xl font-bold text-gradient-primary my-2">{value}</p>
+      <div className={cn("flex items-center text-sm", trendDirection === 'positive' ? 'delta-positive' : 'delta-negative')}>
+        {trendDirection === 'positive' && <ArrowUp className="h-4 w-4 mr-1" />}
+        {trendDirection === 'negative' && <ArrowDown className="h-4 w-4 mr-1" />}
+        <span>{trend}</span>
+      </div>
+    </div>
+  );
+}
+
+function AgingBucket({ label, amount, percentage, color }: { label: string, amount: number, percentage: number, color: string }) {
+    return (
+        <div>
+            <div className="flex justify-between text-sm mb-1">
+                <span className="font-semibold">{label}</span>
+                <span className="text-muted-foreground">{amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span>
+            </div>
+            <div className="w-full bg-muted rounded-full h-2.5">
+                <div className={cn("h-2.5 rounded-full", color)} style={{ width: `${percentage}%` }}></div>
+            </div>
+        </div>
+    )
 }
