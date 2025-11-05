@@ -65,19 +65,23 @@ export default function TruLayout({
         </SidebarContent>
       </Sidebar>
       <SidebarInset>
-        <header className="flex items-center justify-between p-4 bg-background border-b border-border">
-            <Link href="/tru/overview" className="flex items-center gap-2 md:hidden">
-                <Logo className="w-6 h-6 text-primary" />
-                <span className="text-lg font-semibold">VeraLogix Trust</span>
-            </Link>
-             <div className="hidden md:flex items-center gap-4">
-              <Button variant="outline" size="icon" className="h-8 w-8"><Search className="h-4 w-4"/></Button>
-              <p className="text-sm text-muted-foreground">Top bar placeholder</p>
+        <header className="flex h-14 items-center justify-between p-4 bg-background border-b border-border">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className="md:hidden">
+                  <Menu className="w-6 h-6" />
+              </SidebarTrigger>
+              <Link href="/tru/overview" className="flex items-center gap-2 md:hidden">
+                  <Logo className="w-6 h-6 text-primary" />
+                  <span className="text-lg font-semibold">VeraLogix Trust</span>
+              </Link>
+              <div className="hidden md:flex items-center gap-2 rounded-md border p-2 text-sm text-muted-foreground">
+                <Search className="h-4 w-4"/>
+                <span>Search...</span>
+                <span className="ml-4 rounded-sm bg-muted px-1.5 py-0.5 text-xs">⌘K</span>
+              </div>
             </div>
-            <SidebarTrigger className="md:hidden">
-                <Menu className="w-6 h-6" />
-            </SidebarTrigger>
-             <div className="hidden md:flex items-center gap-4">
+             <div className="flex items-center gap-4">
+                <p className="text-sm text-muted-foreground">Notifications</p>
                 <p className="text-sm text-muted-foreground">User Menu</p>
             </div>
         </header>
