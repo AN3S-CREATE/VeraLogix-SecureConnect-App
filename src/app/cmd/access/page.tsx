@@ -154,7 +154,12 @@ export default function AccessControlPage() {
                                         Requesting a temporary override requires multi-factor authentication and is fully audited.
                                     </DialogDescription>
                                 </DialogHeader>
-                                <div className="space-y-4 my-4">
+                                <div className="space-y-4 my-4 relative">
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <p className="text-7xl font-black text-white/5 -rotate-12 select-none">
+                                            HASH: 4B1D...A9F3
+                                        </p>
+                                    </div>
                                     <div>
                                         <Label htmlFor="override-reason">Reason for Override</Label>
                                         <Input id="override-reason" placeholder="e.g., Emergency maintenance access" className="vx-focus" />

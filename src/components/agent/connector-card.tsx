@@ -28,7 +28,7 @@ export const ConnectorCard = React.forwardRef<HTMLDivElement, ConnectorCardProps
   } : {};
 
   return (
-    <div ref={ref} className="vx-card p-4 flex flex-col justify-between h-48 cursor-pointer group vx-focus" style={cardGlowStyle} tabIndex={0}>
+    <div ref={ref} className="vx-card p-4 flex flex-col justify-between h-48 cursor-pointer group vx-focus" style={cardGlowStyle} tabIndex={0} role="button" aria-label={`Configure ${name}`}>
       <div>
         <div className="flex justify-between items-start">
           <h3 className="font-bold text-lg pr-2">{name}</h3>
