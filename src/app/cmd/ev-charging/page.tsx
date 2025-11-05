@@ -46,6 +46,10 @@ export default function EvChargingPlannerPage() {
         // This would typically stop some charging sessions
     };
 
+    const handleTariffUpdate = () => {
+        console.log('sc.agent.ev.tariff_updated');
+    };
+
     return (
         <div className="space-y-8">
             <h1 className="text-3xl font-bold text-foreground">EV Site Load Planner</h1>
@@ -134,7 +138,7 @@ export default function EvChargingPlannerPage() {
                                 <Label htmlFor="peak-hours">Peak Hours (e.g. 17:00-21:00)</Label>
                                 <Input id="peak-hours" defaultValue="17:00-21:00" className="vx-focus" />
                             </div>
-                            <Button className="w-full vx-cta vx-focus">Update Tariffs</Button>
+                            <Button className="w-full vx-cta vx-focus" onClick={handleTariffUpdate}>Update Tariffs</Button>
                         </div>
                     </div>
                 </aside>

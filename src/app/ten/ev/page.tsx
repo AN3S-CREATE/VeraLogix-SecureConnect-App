@@ -19,7 +19,7 @@ export default function TenEvPage() {
   const activeSession = true; // Set to false to see the other state
 
   const handleStopCharging = () => {
-    console.log('sc.agent.ev.session_stopped', { bayId: 2, reason: 'user_request' });
+    console.log('sc.res.ev.session_stopped', { bayId: 2, kwh: 12.5, cost: 4.38 });
     toast({
         title: "Charging Stopped",
         description: "Your EV charging session has been stopped.",
@@ -27,6 +27,7 @@ export default function TenEvPage() {
   };
 
   const handleReserve = () => {
+    console.log('sc.res.ev.session_started', { kwh: 0, cost: 0 });
     toast({
         title: "Bay Reserved",
         description: "Charging bay has been reserved for 15 minutes.",
@@ -61,7 +62,7 @@ export default function TenEvPage() {
                   />
               </svg>
               <div className="z-10 text-center">
-                  <p className="text-4xl font-bold text-gradient-primary">75%</p>
+                  <p className="text-7xl font-bold text-gradient-primary">75%</p>
                   <p className="text-sm text-muted-foreground">12.5 kWh delivered</p>
               </div>
           </div>
@@ -71,6 +72,7 @@ export default function TenEvPage() {
                 color: 'var(--neon-3)',
                 backgroundColor: 'color-mix(in lch, var(--neon-3) 20%, transparent)'
             }}
+            onClick={() => console.log('sc.res.ev.alert_set', { threshold: '80%' })}
            >
                 Charging will complete at 80% to preserve battery health.
            </div>
