@@ -39,7 +39,7 @@ const budgetData = [
     { category: "Admin", budget: 2500, actual: 2500, variance: 0 },
 ]
 
-export default function FinancialsPage() {
+export default function TrusteeOverviewPage() {
 
     useEffect(() => {
         console.log('sc.trust.overview.loaded');
@@ -51,6 +51,9 @@ export default function FinancialsPage() {
 
   return (
     <div className="space-y-8">
+       <style jsx global>{`
+        .delta-negative-trustee { color: #D4FF00; }
+       `}</style>
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-foreground">Portfolio Performance</h1>
         <Button variant="outline" className="vx-focus" onClick={handleExport}><Download className="mr-2" /> Export Report</Button>
@@ -138,7 +141,7 @@ export default function FinancialsPage() {
                                 <TableCell className="font-medium">{item.category}</TableCell>
                                 <TableCell className="text-right">{item.budget.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</TableCell>
                                 <TableCell className="text-right">{item.actual.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</TableCell>
-                                <TableCell className={cn("text-right", item.variance > 0 ? "delta-negative" : item.variance < 0 ? "delta-positive" : "text-muted-foreground")}>
+                                <TableCell className={cn("text-right", item.variance > 0 ? "delta-negative-trustee" : item.variance < 0 ? "delta-positive" : "text-muted-foreground")}>
                                     {item.variance.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                                 </TableCell>
                             </TableRow>
@@ -158,25 +161,11 @@ function KpiCard({ title, value, trend, trendDirection }: { title: string, value
     <div className="p-6 vx-card">
       <p className="text-sm text-foreground/80">{title}</p>
       <p className="text-4xl font-bold text-gradient-primary my-2">{value}</p>
-      <div className={cn("flex items-center text-sm", trendDirection === 'positive' ? 'delta-positive' : 'delta-negative')}>
+      <div className={cn("flex items-center text-sm", trendDirection === 'positive' ? 'delta-positive' : 'delta-negative-trustee')}>
         {trendDirection === 'positive' && <ArrowUp className="h-4 w-4 mr-1" />}
         {trendDirection === 'negative' && <ArrowDown className="h-4 w-4 mr-1" />}
         <span>{trend}</span>
       </div>
     </div>
   );
-}
-
-function AgingBucket({ label, amount, percentage, color }: { label: string, amount: number, percentage: number, color: string }) {
-    return (
-        <div>
-            <div className="flex justify-between text-sm mb-1">
-                <span className="font-semibold">{label}</span>
-                <span className="text-muted-foreground">{amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span>
-            </div>
-            <div className="w-full bg-muted rounded-full h-2.5">
-                <div className={cn("h-2.5 rounded-full", color)} style={{ width: `${percentage}%` }}></div>
-            </div>
-        </div>
-    )
 }

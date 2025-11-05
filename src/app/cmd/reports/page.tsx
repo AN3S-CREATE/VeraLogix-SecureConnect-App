@@ -26,6 +26,15 @@ const sections = [
 export default function ReportsPage() {
     const [selectedTemplate, setSelectedTemplate] = useState('quarterly');
 
+    const handleRender = () => {
+        const activeSections = sections.map(s => s.id);
+        console.log('sc.agent.reports.pack_rendered', { sections: activeSections });
+    };
+    
+    const handleExport = (format: 'pdf' | 'deck') => {
+        console.log('sc.agent.reports.export', { format });
+    };
+
     return (
         <div className="space-y-8">
              <style jsx global>{`
@@ -35,7 +44,7 @@ export default function ReportsPage() {
              `}</style>
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold text-foreground">Report Builder</h1>
-                 <Button variant="outline" className="vx-focus export-glow">
+                 <Button variant="outline" className="vx-focus export-glow" onClick={() => handleExport('pdf')}>
                     <Download className="mr-2" /> Export PDF/Deck
                 </Button>
             </div>
@@ -77,7 +86,7 @@ export default function ReportsPage() {
                                     <Label htmlFor={`section-${section.id}`} className="flex items-center gap-2 font-medium">
                                         {section.icon} {section.name}
                                     </Label>
-                                    <Switch id={`section-${section.id}`} defaultChecked className="vx-focus" />
+                                    <Switch id={`section-${section.id}`} defaultChecked className="vx-focus" onCheckedChange={handleRender} />
                                 </div>
                             ))}
                         </CardContent>
