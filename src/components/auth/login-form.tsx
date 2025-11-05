@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -56,6 +57,21 @@ export function LoginForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    // Special case for admin user to allow logging into any profile
+    if (
+      values.email === "admin@veralogix.com" &&
+      values.password === "admin"
+    ) {
+      toast({
+        title: "Admin Login Successful",
+        description: `Redirecting to ${values.profile} dashboard...`,
+      });
+      const route = profileRoutes[values.profile] || "/";
+      router.push(route);
+      return;
+    }
+    
+    // Default login logic
     console.log(values);
     toast({
         title: "Login Successful",
