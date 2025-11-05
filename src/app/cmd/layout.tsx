@@ -1,6 +1,6 @@
 
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Shield, Home, KeyRound, Menu, User, Settings, Plug, ShieldAlert, Wrench, ReceiptText, DollarSign, Zap, MessageSquare, Search, Droplets, BookOpen } from "lucide-react";
+import { Shield, Home, KeyRound, Menu, User, Settings, Plug, ShieldAlert, Wrench, ReceiptText, DollarSign, Zap, MessageSquare, Search, Droplets, BookOpen, Database } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
 import { Button } from "@/components/ui/button";
