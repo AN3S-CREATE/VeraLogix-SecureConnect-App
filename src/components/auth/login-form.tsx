@@ -22,6 +22,8 @@ import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth, initiateEmailSignIn } from "@/firebase";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   profile: z.enum(["Agent", "Resident", "Trustee", "Vendor", "Estate Manager"]),
@@ -45,7 +47,8 @@ const profileRoutes: Record<string, string> = {
 export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
-
+  const auth = useAuth();
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -56,29 +59,33 @@ export function LoginForm() {
     },
   });
 
+  const profile = form.watch("profile");
+
+  useEffect(() => {
+    if (auth.currentUser) {
+      const route = profileRoutes[profile] || "/";
+      router.push(route);
+    }
+  }, [auth.currentUser, profile, router]);
+
+
   function onSubmit(values: z.infer<typeof formSchema>) {
+    toast({
+        title: "Signing In...",
+        description: `Attempting to log in as ${values.profile}.`,
+    });
+
     // Special case for admin user to allow logging into any profile
     if (
       values.email === "admin@veralogix.com" &&
       values.password === "admin"
     ) {
-      toast({
-        title: "Admin Login Successful",
-        description: `Redirecting to ${values.profile} dashboard...`,
-      });
-      const route = profileRoutes[values.profile] || "/";
-      router.push(route);
+      initiateEmailSignIn(auth, values.email, values.password);
       return;
     }
     
     // Default login logic
-    console.log(values);
-    toast({
-        title: "Login Successful",
-        description: `Redirecting to ${values.profile} dashboard...`,
-    })
-    const route = profileRoutes[values.profile] || "/";
-    router.push(route);
+    initiateEmailSignIn(auth, values.email, values.password);
   }
 
   return (
