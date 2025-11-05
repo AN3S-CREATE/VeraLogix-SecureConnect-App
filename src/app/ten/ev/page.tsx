@@ -26,11 +26,11 @@ export default function TenEvPage() {
     });
   };
 
-  const handleReserve = () => {
-    console.log('sc.res.ev.session_started', { kwh: 0, cost: 0 });
+  const handleReserve = (bayId: number) => {
+    console.log('sc.res.ev.session_started', { bayId, kwh: 0, cost: 0 });
     toast({
         title: "Bay Reserved",
-        description: "Charging bay has been reserved for 15 minutes.",
+        description: `Charging bay ${bayId} has been reserved for 15 minutes.`,
     });
   };
 
@@ -105,7 +105,7 @@ export default function TenEvPage() {
                 <Zap className={cn("mx-auto h-8 w-8", isCharging ? 'text-primary animate-pulse' : 'text-muted-foreground', isAvailable && 'text-primary')} />
                 <p className="font-semibold">Bay {bay.id}</p>
                 <p className={cn("text-sm capitalize", isAvailable ? 'delta-positive' : 'text-muted-foreground')}>{bay.status}</p>
-                <Button size="sm" className="w-full vx-cta vx-focus" disabled={!isAvailable} onClick={handleReserve}>Reserve</Button>
+                <Button size="sm" className="w-full vx-cta vx-focus" disabled={!isAvailable} onClick={() => handleReserve(bay.id)}>Reserve</Button>
               </div>
             )
           })}
