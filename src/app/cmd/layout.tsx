@@ -1,6 +1,6 @@
 
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Shield, Home, KeyRound, Menu, User, Settings, Plug, ShieldAlert, Wrench, ReceiptText, DollarSign, Zap, MessageSquare } from "lucide-react";
+import { Shield, Home, KeyRound, Menu, User, Settings, Plug, ShieldAlert, Wrench, ReceiptText, DollarSign, Zap, MessageSquare, Search } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
 
@@ -79,14 +79,21 @@ export default function CmdLayout({
         </SidebarContent>
       </Sidebar>
       <SidebarInset>
-        <header className="flex items-center justify-between p-4 bg-background border-b border-border md:hidden">
-            <Link href="/cmd" className="flex items-center gap-2">
+        <header className="flex items-center justify-between p-4 bg-background border-b border-border">
+            <Link href="/cmd" className="flex items-center gap-2 md:hidden">
                 <Logo className="w-6 h-6 text-primary" />
                 <span className="text-lg font-semibold">VeraLogix CMD</span>
             </Link>
-            <SidebarTrigger>
+            <div className="hidden md:flex items-center gap-4">
+              <Button variant="outline" size="icon" className="h-8 w-8"><Search className="h-4 w-4"/></Button>
+              <p className="text-sm text-muted-foreground">Top bar placeholder</p>
+            </div>
+            <SidebarTrigger className="md:hidden">
                 <Menu className="w-6 h-6" />
             </SidebarTrigger>
+             <div className="hidden md:flex items-center gap-4">
+                <p className="text-sm text-muted-foreground">User Menu</p>
+            </div>
         </header>
         <main className="p-4 sm:p-6 lg:p-8">
             {children}
