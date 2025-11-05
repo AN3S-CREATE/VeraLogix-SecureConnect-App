@@ -58,10 +58,11 @@ export default function IncidentsPage() {
                 // Otherwise, default to the second incident
                 setSelectedIncident(incidents[1]);
             }
-        } else {
+        } else if (!isLoading) {
+            // If there are no incidents and we are not loading, clear the selection
             setSelectedIncident(null);
         }
-    }, [incidents, selectedIncident?.id]);
+    }, [incidents, isLoading]);
 
 
     const severityConfig = {
@@ -240,4 +241,3 @@ export default function IncidentsPage() {
         </div>
     );
 }
-
