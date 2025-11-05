@@ -21,9 +21,13 @@ export default function TenConciergePage() {
       { from: "user", text: "I'm expecting a package from Amazon, has it arrived?", time: "2:31 PM" },
       { from: "concierge", text: "Let me check for you. Yes, a package for you was logged at 1:15 PM. You can pick it up anytime.", time: "2:32 PM" },
   ];
+  
+  const handleSendMessage = () => {
+    console.log('sc.ten.msg.sent', { thread_type: 'concierge' });
+  }
 
   return (
-    <div className="h-[calc(100vh-4rem)] md:h-[calc(100vh-2rem)] flex vx-card p-0">
+    <div className="h-[calc(100vh-4rem)] md:h-[calc(100vh-8rem)] flex vx-card p-0">
       <div className="hidden md:flex flex-col w-1/3 border-r border-border">
         <div className="p-4 border-b border-border">
           <h1 className="text-xl font-bold">Concierge</h1>
@@ -73,7 +77,7 @@ export default function TenConciergePage() {
             </div>
             <div className="flex gap-2">
                 <Input placeholder="Type your message..." className="vx-focus" />
-                <Button className="vx-cta vx-focus"><SendHorizonal className="w-5 h-5" /></Button>
+                <Button className="vx-cta vx-focus" onClick={handleSendMessage}><SendHorizonal className="w-5 h-5" /></Button>
             </div>
         </div>
       </div>

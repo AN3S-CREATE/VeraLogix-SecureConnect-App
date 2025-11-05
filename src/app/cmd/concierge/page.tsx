@@ -34,6 +34,10 @@ export default function AgentConciergePage() {
         { from: "user", text: "Hi, I received a reminder about my invoice. Can I get an extension until Friday?", time: "2:31 PM" },
         { from: "agent", text: "Good afternoon. I can grant a 3-day extension. Would that work for you?", time: "2:32 PM" },
     ];
+    
+    const handleAction = (action: string) => {
+        console.log('sc.agent.concierge.action_executed', { action });
+    }
 
     return (
         <div className="h-[calc(100vh-8rem)] flex vx-card p-0">
@@ -86,9 +90,9 @@ export default function AgentConciergePage() {
                 </ScrollArea>
                 <div className="p-4 border-t border-border space-y-2 bg-background rounded-b-lg">
                     <div className="flex gap-2">
-                        <Button variant="outline" className="chip-info vx-focus">Send Invoice</Button>
-                        <Button variant="outline" className="chip-info vx-focus">Offer Payment Plan</Button>
-                        <Button variant="outline" className="chip-alert vx-focus">Escalate to Collections</Button>
+                        <Button variant="outline" className="chip-info vx-focus" onClick={() => handleAction('send_invoice')}>Send Invoice</Button>
+                        <Button variant="outline" className="chip-info vx-focus" onClick={() => handleAction('offer_payment_plan')}>Offer Payment Plan</Button>
+                        <Button variant="outline" className="chip-alert vx-focus" onClick={() => handleAction('escalate_collections')}>Escalate to Collections</Button>
                     </div>
                     <div className="flex gap-2">
                         <Input placeholder="Type your message..." className="vx-focus" />
