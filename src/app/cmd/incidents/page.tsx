@@ -9,18 +9,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { FilePlus2, Filter, Download, ShieldAlert } from "lucide-react";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import type { Ticket } from "@/lib/entities";
 
 export default function IncidentsPage() {
-    const firestore = useFirestore();
-    const ticketsCollection = useMemoFirebase(() => firestore ? collection(firestore, 'tickets') : null, [firestore]);
-    const { data: incidents, isLoading } = useCollection<Ticket>(ticketsCollection);
+    // For a complete demo, we will use mock data.
+    // The Firestore hooks have been removed to ensure the page is always populated.
+    const isLoading = false;
     
-    // Initial mock data for demo purposes, will be replaced by Firestore data when available
     const initialIncidents: Ticket[] = [
         { id: 'INC-001', unitId: 'Lobby', category: 'Access', desc: 'Unauthorised access attempt on main entrance.', status: 'New', slaDeadline: '2024-08-01T12:00:00Z', timeline: [], severity: 'high', assignee: 'Unassigned', sla: 95 },
         { id: 'INC-002', unitId: 'Sector 4', category: 'Perimeter', desc: 'Perimeter fence breach detected near Sector 4.', status: 'Assigned', slaDeadline: '2024-08-01T11:00:00Z', timeline: [], severity: 'critical', assignee: 'John Doe', sla: 80 },
@@ -30,38 +27,7 @@ export default function IncidentsPage() {
     
     const [displayData, setDisplayData] = useState<Ticket[]>(initialIncidents);
     const [selectedIncident, setSelectedIncident] = useState<Ticket | null>(initialIncidents[0] || null);
-
-    useEffect(() => {
-        // For a demo, we prioritize showing the initial mock data.
-        // In a real app, you might merge or replace this with live data.
-        if (incidents) {
-            // If firestore data loads, we can choose to show it.
-            // For a consistent demo experience, we can also choose to stick with the mock data.
-            // Let's replace the mock data with live data if it's available and not empty.
-            if (incidents.length > 0) {
-                 setDisplayData(incidents);
-            }
-        } else if (!isLoading) {
-            // If there's no live data and we are not loading, ensure mock data is shown.
-            setDisplayData(initialIncidents);
-        }
-    }, [incidents, isLoading]);
-
-    // Update selected incident when display data changes
-    useEffect(() => {
-        if (displayData && displayData.length > 0) {
-            if (selectedIncident) {
-                const updatedSelected = displayData.find(i => i.id === selectedIncident.id);
-                setSelectedIncident(updatedSelected || displayData[0]);
-            } else {
-                setSelectedIncident(displayData[0]);
-            }
-        } else if (!isLoading) {
-            setSelectedIncident(null);
-        }
-    }, [displayData, isLoading, selectedIncident?.id]);
-
-
+    
     const severityConfig = {
         critical: { label: 'Critical', className: 'bg-red-500/20 text-red-400 border-red-500/50' },
         high: { label: 'High', className: 'bg-orange-500/20 text-orange-400 border-orange-500/50' },
@@ -238,5 +204,7 @@ export default function IncidentsPage() {
         </div>
     );
 }
+
+    
 
     
