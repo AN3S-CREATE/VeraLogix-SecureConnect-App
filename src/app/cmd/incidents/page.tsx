@@ -32,12 +32,16 @@ export default function IncidentsPage() {
     const [selectedIncident, setSelectedIncident] = useState<Ticket | null>(initialIncidents[0] || null);
 
     useEffect(() => {
-        // Once Firestore data loads, it replaces the initial mock data.
-        // For a pure demo, you might want to always show mock data.
-        if (incidents && incidents.length > 0) {
-            setDisplayData(incidents);
+        // For a demo, we prioritize showing the initial mock data.
+        // In a real app, you might merge or replace this with live data.
+        if (!incidents && !isLoading) {
+             setDisplayData(initialIncidents);
+        } else if (incidents) {
+            // To keep the demo consistent, we can choose to always show mock data
+            // or merge it. For this demo, we'll stick to mock data if it's there.
+            // setDisplayData(incidents);
         }
-    }, [incidents]);
+    }, [incidents, isLoading]);
 
     // Update selected incident when display data changes
     useEffect(() => {
@@ -230,5 +234,7 @@ export default function IncidentsPage() {
         </div>
     );
 }
+
+    
 
     
