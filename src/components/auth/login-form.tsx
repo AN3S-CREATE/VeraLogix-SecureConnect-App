@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, initiateEmailSignIn } from "@/firebase";
 import { useEffect } from "react";
+import Image from "next/image";
 
 const formSchema = z.object({
   profile: z.enum(["Agent", "Resident", "Trustee", "Vendor", "Estate Manager"]),
@@ -92,9 +93,14 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-sm space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight font-headline text-foreground">
-          Agent Secure Login
-        </h1>
+        <Image 
+          src="https://iili.io/KSEoFAQ.png" 
+          alt="SecureConnect Logo" 
+          width={300} 
+          height={50} 
+          className="mx-auto"
+          priority
+        />
         <p className="mt-2 text-muted-foreground">
           Access the VeraLogix Command Center.
         </p>
