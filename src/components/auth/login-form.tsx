@@ -70,11 +70,6 @@ export function LoginForm() {
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    toast({
-        title: "Signing In...",
-        description: `Attempting to log in as ${values.profile}.`,
-    });
-
     // Special case for admin user to allow logging into any profile
     if (
       values.email === "admin@veralogix.com" &&
@@ -85,6 +80,11 @@ export function LoginForm() {
        return; // Bypass Firebase auth for this special user
     }
     
+    toast({
+        title: "Signing In...",
+        description: `Attempting to log in as ${values.profile}.`,
+    });
+
     // Default login logic
     initiateEmailSignIn(auth, values.email, values.password);
   }
