@@ -9,6 +9,8 @@ import { ArrowRight, Building, FileText, Users, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import Link from "next/link";
 
 const steps = [
   { id: 1, title: "Company Profile", icon: <Building /> },
@@ -73,6 +75,14 @@ export default function VendorOnboardingPage() {
             </Button>
         </div>
       </div>
+      <footer className="py-4 px-4 absolute bottom-0">
+          <div className="flex items-center justify-center gap-2">
+              <span className="text-xs text-muted-foreground">Powered by</span>
+              <Link href="https://veralogix.com" target="_blank" rel="noopener noreferrer">
+                <Image src="https://iili.io/KeG9tjt.png" alt="VeraLogix Logo" width={80} height={16} />
+              </Link>
+          </div>
+      </footer>
     </div>
   );
 }
@@ -151,5 +161,3 @@ function TeamSetupStep() {
         </div>
     )
 }
-
-    

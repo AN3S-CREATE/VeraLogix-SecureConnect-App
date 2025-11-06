@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -8,6 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { ArrowRight, UserPlus, Bell, FileText, Home } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 
 const steps = [
   { id: 1, title: "Link Your Unit", icon: <Home /> },
@@ -76,6 +79,14 @@ export default function OnboardingPage() {
             </Button>
         </div>
       </div>
+       <footer className="py-4 px-4 absolute bottom-0">
+          <div className="flex items-center justify-center gap-2">
+              <span className="text-xs text-muted-foreground">Powered by</span>
+              <Link href="https://veralogix.com" target="_blank" rel="noopener noreferrer">
+                <Image src="https://iili.io/KeG9tjt.png" alt="VeraLogix Logo" width={80} height={16} />
+              </Link>
+          </div>
+      </footer>
     </div>
   );
 }

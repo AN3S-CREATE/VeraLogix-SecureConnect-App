@@ -1,14 +1,16 @@
+
 import Image from "next/image";
 import { LoginForm } from "@/components/auth/login-form";
 import { Logo } from "@/components/icons/logo";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import Link from "next/link";
 
 export default function Home() {
   const loginImage = PlaceHolderImages.find(p => p.id === 'login-background');
 
   return (
-    <div className="min-h-screen w-full bg-black font-body">
-      <div className="grid h-screen w-full grid-cols-1 lg:grid-cols-2">
+    <div className="min-h-screen w-full bg-black font-body flex flex-col">
+      <div className="grid h-screen w-full grid-cols-1 lg:grid-cols-2 flex-1">
         <div className="relative hidden flex-col bg-muted p-10 text-white lg:flex">
           {loginImage && (
             <Image
@@ -41,6 +43,14 @@ export default function Home() {
           <LoginForm />
         </div>
       </div>
+       <footer className="py-2 px-4">
+          <div className="flex items-center justify-center gap-2">
+              <span className="text-xs text-muted-foreground">Powered by</span>
+              <Link href="https://veralogix.com" target="_blank" rel="noopener noreferrer">
+                <Image src="https://iili.io/KeG9tjt.png" alt="VeraLogix Logo" width={80} height={16} />
+              </Link>
+          </div>
+      </footer>
     </div>
   );
 }
