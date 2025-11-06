@@ -78,7 +78,7 @@ export function LoginForm() {
     // Special case for admin user to allow logging into any profile
     if (
       values.email === "admin@veralogix.com" &&
-      values.password === "admin"
+      values.password === "secureconnect"
     ) {
       initiateEmailSignIn(auth, values.email, values.password);
       return;
@@ -206,5 +206,3 @@ export function LoginForm() {
     </div>
   );
 }
-
-    
