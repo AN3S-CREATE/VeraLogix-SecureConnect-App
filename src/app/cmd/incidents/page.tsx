@@ -34,12 +34,16 @@ export default function IncidentsPage() {
     useEffect(() => {
         // For a demo, we prioritize showing the initial mock data.
         // In a real app, you might merge or replace this with live data.
-        if (!incidents && !isLoading) {
-             setDisplayData(initialIncidents);
-        } else if (incidents) {
-            // To keep the demo consistent, we can choose to always show mock data
-            // or merge it. For this demo, we'll stick to mock data if it's there.
-            // setDisplayData(incidents);
+        if (incidents) {
+            // If firestore data loads, we can choose to show it.
+            // For a consistent demo experience, we can also choose to stick with the mock data.
+            // Let's replace the mock data with live data if it's available and not empty.
+            if (incidents.length > 0) {
+                 setDisplayData(incidents);
+            }
+        } else if (!isLoading) {
+            // If there's no live data and we are not loading, ensure mock data is shown.
+            setDisplayData(initialIncidents);
         }
     }, [incidents, isLoading]);
 
@@ -234,7 +238,5 @@ export default function IncidentsPage() {
         </div>
     );
 }
-
-    
 
     
