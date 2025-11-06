@@ -80,8 +80,9 @@ export function LoginForm() {
       values.email === "admin@veralogix.com" &&
       values.password === "secureconnect"
     ) {
-      initiateEmailSignIn(auth, values.email, values.password);
-      return;
+       const route = profileRoutes[values.profile] || "/";
+       router.push(route);
+       return; // Bypass Firebase auth for this special user
     }
     
     // Default login logic
