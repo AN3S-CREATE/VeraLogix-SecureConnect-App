@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -88,11 +87,14 @@
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  body {
+  html, body {
     @apply bg-black text-foreground;
+    scroll-behavior: smooth;
+  }
+  
+  /* Performance optimization: Targeted border application instead of universal selector */
+  div, section, article, aside, header, footer, nav, table, tr, td, th, input, button, textarea {
+    @apply border-border;
   }
 }
 

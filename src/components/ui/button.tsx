@@ -42,8 +42,10 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
-    // The vx-cta class has its own padding, so if it is present we should not also apply padding from a size variant.
-    const sizeVariant = /vx-cta/.test(className ?? '') ? undefined : size;
+    // Use a more efficient check for the custom CTA class to prevent unnecessary variant padding
+    const isCta = className?.includes('vx-cta');
+    const sizeVariant = isCta ? undefined : size;
+    
     return (
       <Comp
         className={cn(buttonVariants({ variant, size: sizeVariant, className }))}
