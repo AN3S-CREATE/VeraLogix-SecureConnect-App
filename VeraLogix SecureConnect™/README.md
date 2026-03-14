@@ -10,9 +10,10 @@ VeraLogix SecureConnect™ is a high-security property management platform desig
 
 To get started with development:
 
-1.  Install dependencies: `npm install`
-2.  Run the development server: `npm run dev`
-3.  Open [http://localhost:9002](http://localhost:9002) in your browser.
+1.  Navigate to the project root: `cd "VeraLogix SecureConnect™"`
+2.  Install dependencies: `npm install`
+3.  Run the development server: `npm run dev`
+4.  Open [http://localhost:9002](http://localhost:9002) in your browser.
 
 ## Key Technologies
 
