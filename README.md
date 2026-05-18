@@ -1,3 +1,4 @@
+
 # VeraLogix SecureConnect™
 
 This is the official repository for the VeraLogix SecureConnect™ platform, built with Next.js, Firebase, and Genkit.

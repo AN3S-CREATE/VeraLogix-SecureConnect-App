@@ -1,7 +1,6 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -31,6 +30,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'iili.io',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.pravatar.cc',
         port: '',
         pathname: '/**',
       },
