@@ -93,7 +93,7 @@ export default function CmdLayout({
           <main className="flex-1 p-4 sm:p-6 lg:p-8">
               {children}
           </main>
-          <footer className="py-4 px-4 border-t border-border/10 bg-black/5">
+          <footer className="py-2 px-4 border-t border-border/10 bg-black/5">
             <div className="flex flex-col items-center justify-center gap-1">
                 <span className="text-[10px] text-muted-foreground uppercase tracking-widest opacity-50">Powered by</span>
                 <Link href="https://veralogix.com" target="_blank" rel="noopener noreferrer">

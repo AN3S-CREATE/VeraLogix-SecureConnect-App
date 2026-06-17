@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: 'Secure platform for Agents, Trustees, Vendors, and Residents.',
 };
 
+import { PrototypeSeeder } from '@/components/prototype-seeder';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -20,14 +22,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
       </head>
-      <body 
-        className="font-body antialiased" 
-        style={{ lineHeight: '1.5' }}
-        data-gramm="false"
-        data-enable-grammarly="false"
-        spellCheck="false"
-      >
+      <body className="font-body antialiased" style={{ lineHeight: '1.5' }}>
         <FirebaseClientProvider>
+          <PrototypeSeeder />
           {children}
         </FirebaseClientProvider>
         <Toaster />

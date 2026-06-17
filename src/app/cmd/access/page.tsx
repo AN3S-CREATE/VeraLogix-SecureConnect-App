@@ -10,22 +10,27 @@ import { UserPlus, ShieldAlert, Timer, Map, List, KeyRound, RadioTower } from "l
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useFirestore } from "@/firebase";
+import { useCollection } from "@/firebase/firestore/use-collection";
+import { useMemoFirebase } from "@/firebase/provider";
+import { collection } from "firebase/firestore";
 
 export default function AccessControlPage() {
-  const doors = [
-    { id: "D-101", name: "Main Lobby Entrance", state: "locked", health: "healthy" },
-    { id: "D-102", name: "Parking Garage P1", state: "unlocked", health: "healthy" },
-    { id: "D-201", name: "Floor 2 - East Wing", state: "locked", health: "degraded" },
-    { id: "D-202", name: "Floor 2 - West Wing", state: "locked", health: "healthy" },
-    { id: "D-300", name: "Rooftop Access", state: "locked", health: "offline" },
-    { id: "SRV-01", name: "Server Room", state: "locked", health: "healthy" },
-  ];
+  const firestore = useFirestore();
+  const doorsQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'doors') : null),
+    [firestore]
+  );
+  const { data: doorsData, isLoading: isLoadingDoors } = useCollection<{ id: string; name: string; state: "locked" | "unlocked"; health: "healthy" | "degraded" | "offline" }>(doorsQuery);
 
-  const arrivalFeed = [
-      { id: 1, name: "John Doe (PASS-001)", location: "Main Lobby", time: "1 min ago", status: "granted" },
-      { id: 2, name: "Delivery Drone #A4", location: "Rooftop Landing", time: "3 mins ago", status: "granted" },
-      { id: 3, name: "Unknown", location: "Parking Garage P1", time: "5 mins ago", status: "denied" },
-  ];
+  const doors = doorsData || [];
+
+  const logsQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'accessLogs') : null),
+    [firestore]
+  );
+  const { data: logsData } = useCollection<{ id: string; name: string; location: string; time: string; status: string; }>(logsQuery);
+  const arrivalFeed = logsData || [];
 
   const handleOverride = () => {
       console.log('sc.agent.access.override_initiated');
