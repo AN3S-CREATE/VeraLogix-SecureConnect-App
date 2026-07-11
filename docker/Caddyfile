@@ -1,0 +1,22 @@
+{
+	auto_https off
+}
+
+:80 {
+	handle /realms/* {
+		reverse_proxy keycloak:8080
+	}
+	handle /resources/* {
+		reverse_proxy keycloak:8080
+	}
+	handle /admin/* {
+		reverse_proxy keycloak:8080
+	}
+	handle /minio/* {
+		uri strip_prefix /minio
+		reverse_proxy minio:9000
+	}
+	handle {
+		reverse_proxy api:3000
+	}
+}

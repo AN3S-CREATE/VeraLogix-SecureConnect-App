@@ -10,27 +10,49 @@ import { UserPlus, ShieldAlert, Timer, Map, List, KeyRound, RadioTower } from "l
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { useFirestore } from "@/firebase";
-import { useCollection } from "@/firebase/firestore/use-collection";
-import { useMemoFirebase } from "@/firebase/provider";
-import { collection } from "firebase/firestore";
+import { useCollection } from "@/backend";
+
+type DoorRow = {
+  id: string;
+  name: string;
+  state: "locked" | "unlocked";
+  health: string;
+  proximityReady?: boolean;
+  siteId?: string;
+};
+
+type AccessLogRow = {
+  id: string;
+  name?: string | null;
+  location?: string | null;
+  ts?: string;
+  result: "granted" | "denied";
+  createdAt?: string;
+};
 
 export default function AccessControlPage() {
-  const firestore = useFirestore();
-  const doorsQuery = useMemoFirebase(
-    () => (firestore ? collection(firestore, 'doors') : null),
-    [firestore]
-  );
-  const { data: doorsData, isLoading: isLoadingDoors } = useCollection<{ id: string; name: string; state: "locked" | "unlocked"; health: "healthy" | "degraded" | "offline" }>(doorsQuery);
+  const { data: doorsData } = useCollection<DoorRow>("doors", { realtimeTable: "doors" });
+  const doors = (doorsData || []).map((d) => ({
+    ...d,
+    health: (["healthy", "degraded", "offline"].includes(d.health)
+      ? d.health
+      : d.health === "ok"
+        ? "healthy"
+        : d.health === "warn"
+          ? "degraded"
+          : "offline") as "healthy" | "degraded" | "offline",
+  }));
 
-  const doors = doorsData || [];
-
-  const logsQuery = useMemoFirebase(
-    () => (firestore ? collection(firestore, 'accessLogs') : null),
-    [firestore]
-  );
-  const { data: logsData } = useCollection<{ id: string; name: string; location: string; time: string; status: string; }>(logsQuery);
-  const arrivalFeed = logsData || [];
+  const { data: logsData } = useCollection<AccessLogRow>("access-logs", {
+    realtimeTable: "access_logs",
+  });
+  const arrivalFeed = (logsData || []).map((log) => ({
+    id: log.id,
+    name: log.name ?? "Unknown",
+    location: log.location ?? "—",
+    time: log.ts ? new Date(log.ts).toLocaleString() : "Just now",
+    status: log.result,
+  }));
 
   const handleOverride = () => {
       console.log('sc.agent.access.override_initiated');

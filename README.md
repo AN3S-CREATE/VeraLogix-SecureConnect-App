@@ -44,7 +44,7 @@ Getting started with the VeraLogix SecureConnect prototype environment is simple
 
 ### Prerequisites
 - Node.js 20+
-- A Firebase Project (for Authentication & Firestore)
+- Docker (for the self-hosted backend stack)
 
 ### Installation
 
@@ -53,19 +53,29 @@ Getting started with the VeraLogix SecureConnect prototype environment is simple
 git clone https://github.com/VeralogixCatalyst/VeraLogix-SecureConnect-App.git
 cd VeraLogix-SecureConnect-App
 
-# 2. Install Frontend Dependencies
+# 2. Install dependencies (frontend + backend workspaces)
 npm install
 
 # 3. Configure Environment
 cp .env.example .env.local
-# Update your Firebase credentials
+cp backend/.env.example backend/.env
 
-# 4. Start the Development Server
+# 4. Start backend stack (Postgres, Keycloak, Redis, MinIO, API)
+npm run docker:up
+
+# 5. Migrate + seed (from another terminal if API container already migrates)
+npm run db:migrate
+npm run db:seed
+
+# 6. Start the Next.js app
 npm run dev
 ```
 
-> [!TIP]
-> The application will start at `http://localhost:3000`. The prototype includes an automatic seeder (`PrototypeSeeder`) that populates sample doors, access logs, and incidents on your first run.
+> App UI: `http://localhost:9002` · API docs: `http://localhost:3000/docs`  
+> See [`backend/README.md`](backend/README.md) and [`docs/migration-firebase.md`](docs/migration-firebase.md).
+
+Demo login (Keycloak): `admin@veralogix.com` / `secureconnect`  
+Local API bypass: set `NEXT_PUBLIC_DEV_AUTH_BYPASS=true` and `DEV_AUTH_BYPASS=true`.
 
 ---
 
@@ -142,32 +152,41 @@ VeraLogix SecureConnect is built from the ground up to solve the fragmented secu
 
 ## 🛠️ Architecture & Tech Stack
 
-VeraLogix SecureConnect utilizes a highly scalable, modern, and locally-deployable tech stack:
+VeraLogix SecureConnect utilizes a highly scalable, modern, and self-hosted open-source stack (no Firebase):
 
 ```mermaid
 graph TD
-    A[Next.js App Router UI] --> B(Firebase Client Provider)
-    B --> G[(Firestore Realtime Database)]
-    B --> H[(Firebase Authentication)]
-    A --> C{Genkit AI Orchestrator}
-    C -->|Incident Summarization| F[Gemini 2.5 Flash]
+    A[Next.js App Router UI] --> B(Backend Client SDK)
+    B --> C[Fastify API]
+    C --> D[Postgres + Realtime NOTIFY]
+    C --> E[Keycloak OIDC]
+    C --> F[MinIO S3]
+    C --> G[Redis / BullMQ Workers]
 ```
 
-- **Frontend:** Next.js 15, React, Tailwind CSS, shadcn/ui.
-- **Backend Services:** Firebase Firestore, Firebase Authentication.
-- **AI Layer:** Google Genkit, Gemini Models.
-- **Infrastructure:** Vercel / Firebase App Hosting.
+| Layer | Technology |
+|-------|------------|
+| Frontend | Next.js 15, React 18, Tailwind, shadcn/ui |
+| API | Fastify 5, Zod, OpenAPI |
+| Auth | Keycloak (self-hosted) |
+| Database | PostgreSQL 16 + Drizzle ORM |
+| Realtime | LISTEN/NOTIFY + WebSockets |
+| Storage | MinIO |
+| Jobs | BullMQ + Redis |
+| Edge | Caddy |
+| Observability | Prometheus + Grafana (optional profile) |
 
 ---
 
 ## 🗺️ Roadmap
 
 - [x] High-Fidelity UI Scaffolding & Shared Components
-- [x] Initial Repository Architecture & Live Firebase Prototyping Bindings
-- [ ] Implement robust RBAC (Role-Based Access Control)
-- [ ] Connect Command Center Dashboard to Live Agent Logs
-- [ ] Implement Genkit AI Flow Orchestration for Incident Reports
-- [ ] Automated Component Testing (Vitest/Playwright)
+- [x] Self-hosted backend (Keycloak + Postgres + MinIO + BullMQ) replacing Firebase
+- [x] RBAC, POPIA export/deletion, OpenAPI, Docker Compose
+- [x] Frontend cutover for auth, doors, and access logs
+- [ ] Wire remaining portal pages to live CRUD APIs
+- [ ] Optional Genkit AI flows (independent of Firebase)
+- [ ] Expand automated coverage toward ≥85% on all backend modules
 
 ---
 

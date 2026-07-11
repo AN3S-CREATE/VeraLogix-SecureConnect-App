@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,7 +21,7 @@ import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth, initiateEmailSignIn } from "@/firebase";
+import { useBackend, useUser } from "@/backend";
 import { useEffect } from "react";
 import Image from "next/image";
 
@@ -38,18 +37,19 @@ const formSchema = z.object({
 });
 
 const profileRoutes: Record<string, string> = {
-    "Agent": "/cmd",
-    "Resident": "/ten/home",
-    "Trustee": "/tru/overview",
-    "Vendor": "/ven/onboarding",
-    "Estate Manager": "/cmd"
+  Agent: "/cmd",
+  Resident: "/ten/home",
+  Trustee: "/tru/overview",
+  Vendor: "/ven/onboarding",
+  "Estate Manager": "/cmd",
 };
 
 export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
-  const auth = useAuth();
-  
+  const { login, loginDev } = useBackend();
+  const { user } = useUser();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -63,41 +63,48 @@ export function LoginForm() {
   const profile = form.watch("profile");
 
   useEffect(() => {
-    if (auth.currentUser) {
+    if (user) {
       const route = profileRoutes[profile] || "/";
       router.push(route);
     }
-  }, [auth.currentUser, profile, router]);
+  }, [user, profile, router]);
 
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Special case for admin user to allow logging into any profile
-    if (
-      values.email === "admin@veralogix.com" &&
-      values.password === "secureconnect"
-    ) {
-       const route = profileRoutes[values.profile] || "/";
-       router.push(route);
-       return; // Bypass Firebase auth for this special user
-    }
-    
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     toast({
-        title: "Signing In...",
-        description: `Attempting to log in as ${values.profile}.`,
+      title: "Signing In...",
+      description: `Attempting to log in as ${values.profile}.`,
     });
 
-    // Default login logic
-    initiateEmailSignIn(auth, values.email, values.password);
+    try {
+      // Dev bypass only when API enables DEV_AUTH_BYPASS
+      if (
+        values.email === "admin@veralogix.com" &&
+        values.password === "secureconnect" &&
+        process.env.NEXT_PUBLIC_DEV_AUTH_BYPASS === "true"
+      ) {
+        await loginDev();
+      } else {
+        await login(values.email, values.password);
+      }
+      const route = profileRoutes[values.profile] || "/";
+      router.push(route);
+    } catch (err) {
+      toast({
+        title: "Sign-in failed",
+        description: err instanceof Error ? err.message : "Unable to authenticate",
+        variant: "destructive",
+      });
+    }
   }
 
   return (
     <div className="w-full max-w-sm space-y-6">
       <div className="text-center">
-        <Image 
-          src="https://iili.io/KSEoFAQ.png" 
-          alt="SecureConnect Logo" 
-          width={300} 
-          height={50} 
+        <Image
+          src="https://iili.io/KSEoFAQ.png"
+          alt="SecureConnect Logo"
+          width={300}
+          height={50}
           className="mx-auto"
           priority
         />
@@ -173,19 +180,17 @@ export function LoginForm() {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Remember me
-                      </FormLabel>
+                      <FormLabel>Remember me</FormLabel>
                     </div>
                   </FormItem>
                 )}
               />
               <Link
-                  href="#"
-                  className="text-sm font-medium text-primary hover:text-primary/90 hover:underline underline-offset-4 transition-colors vx-focus"
-                >
-                  Forgot password?
-                </Link>
+                href="#"
+                className="text-sm font-medium text-primary hover:text-primary/90 hover:underline underline-offset-4 transition-colors vx-focus"
+              >
+                Forgot password?
+              </Link>
             </div>
             <Button type="submit" className={cn("w-full transition-all vx-cta vx-focus")}>
               <KeyRound className="mr-2 h-4 w-4" />
@@ -193,19 +198,28 @@ export function LoginForm() {
             </Button>
           </form>
         </Form>
-        
+
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+            <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">
-              Or continue with
-              </span>
+            <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
           </div>
         </div>
-        
-        <Button variant="outline" className="w-full font-semibold transition-all vx-focus">
+
+        <Button
+          variant="outline"
+          className="w-full font-semibold transition-all vx-focus"
+          type="button"
+          onClick={() => {
+            const kc = process.env.NEXT_PUBLIC_KEYCLOAK_URL ?? "http://localhost:8080";
+            const realm = process.env.NEXT_PUBLIC_KEYCLOAK_REALM ?? "secureconnect";
+            const clientId = process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ?? "secureconnect-web";
+            const redirect = encodeURIComponent(window.location.origin);
+            window.location.href = `${kc}/realms/${realm}/protocol/openid-connect/auth?client_id=${clientId}&redirect_uri=${redirect}&response_type=code&scope=openid`;
+          }}
+        >
           <Shield className="mr-2 h-4 w-4" />
           Sign In with SSO
         </Button>

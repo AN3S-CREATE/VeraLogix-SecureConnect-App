@@ -1,0 +1,131 @@
+{
+  "realm": "secureconnect",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "roles": {
+    "realm": [
+      { "name": "resident", "description": "Resident portal access" },
+      { "name": "agent", "description": "Agent command center" },
+      { "name": "trustee", "description": "Trustee portal" },
+      { "name": "vendor", "description": "Vendor portal" },
+      { "name": "estate_manager", "description": "Estate manager" },
+      { "name": "admin", "description": "Platform administrator" },
+      { "name": "offline_access" },
+      { "name": "uma_authorization" },
+      { "name": "default-roles-secureconnect" }
+    ]
+  },
+  "users": [
+    {
+      "username": "admin@veralogix.com",
+      "email": "admin@veralogix.com",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "secureconnect",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin", "agent", "default-roles-secureconnect"]
+    },
+    {
+      "username": "resident@example.com",
+      "email": "resident@example.com",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Resident",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "resident123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["resident", "default-roles-secureconnect"]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "secureconnect-web",
+      "name": "SecureConnect Web",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "redirectUris": [
+        "http://localhost:9002/*",
+        "http://localhost:3000/*",
+        "http://localhost/*"
+      ],
+      "webOrigins": ["http://localhost:9002", "http://localhost:3000", "http://localhost", "+"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocol": "openid-connect"
+    },
+    {
+      "clientId": "secureconnect-api",
+      "name": "SecureConnect API",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "change-me-api-secret",
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": ["http://localhost:3000/*"],
+      "webOrigins": ["+"],
+      "protocol": "openid-connect"
+    }
+  ],
+  "identityProviders": [
+    {
+      "alias": "google",
+      "providerId": "google",
+      "enabled": false,
+      "updateProfileFirstLoginMode": "on",
+      "trustEmail": true,
+      "storeToken": false,
+      "addReadTokenRoleOnCreate": false,
+      "authenticateByDefault": false,
+      "linkOnly": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "config": {
+        "clientId": "REPLACE_WITH_GOOGLE_CLIENT_ID",
+        "clientSecret": "REPLACE_WITH_GOOGLE_CLIENT_SECRET",
+        "defaultScope": "openid profile email"
+      }
+    },
+    {
+      "alias": "apple",
+      "providerId": "apple",
+      "enabled": false,
+      "updateProfileFirstLoginMode": "on",
+      "trustEmail": true,
+      "config": {
+        "clientId": "REPLACE_WITH_APPLE_CLIENT_ID",
+        "clientSecret": "REPLACE_WITH_APPLE_CLIENT_SECRET"
+      }
+    }
+  ],
+  "smtpServer": {
+    "host": "mailpit",
+    "port": "1025",
+    "from": "noreply@secureconnect.local",
+    "fromDisplayName": "SecureConnect",
+    "ssl": "false",
+    "starttls": "false",
+    "auth": "false"
+  }
+}

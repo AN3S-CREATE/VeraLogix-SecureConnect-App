@@ -9,26 +9,32 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useFirestore } from "@/firebase";
-import { useCollection } from "@/firebase/firestore/use-collection";
-import { useMemoFirebase } from "@/firebase/provider";
-import { collection, addDoc } from "firebase/firestore";
+import { useAuthClient, useCollection } from "@/backend";
+
+type AccessLogRow = {
+  id: string;
+  name?: string | null;
+  location?: string | null;
+  ts?: string;
+  result: "granted" | "denied";
+};
 
 export default function TenKeysPage() {
   const { toast } = useToast();
+  const client = useAuthClient();
   const [showQr, setShowQr] = useState(false);
   const [progress, setProgress] = useState(100);
 
-  const firestore = useFirestore();
-  const logsQuery = useMemoFirebase(
-    () => (firestore ? collection(firestore, 'accessLogs') : null),
-    [firestore]
-  );
-  const { data: logsData } = useCollection<{ id: string; name: string; location: string; time: string; status: string; }>(logsQuery);
-  const accessHistory = (logsData || []).map(log => ({
-    door: log.location,
-    result: log.status === 'granted' ? 'Granted' : 'Denied',
-    time: log.time
+  const { data: logsData, refresh } = useCollection<AccessLogRow>("access-logs", {
+    realtimeTable: "access_logs",
+  });
+  const { data: doorsData } = useCollection<{ id: string; name: string }>("doors", {
+    realtimeTable: "doors",
+  });
+  const accessHistory = (logsData || []).map((log) => ({
+    door: log.location ?? "—",
+    result: log.result === "granted" ? "Granted" : "Denied",
+    time: log.ts ? new Date(log.ts).toLocaleString() : "Just now",
   }));
 
   useEffect(() => {
@@ -50,27 +56,35 @@ export default function TenKeysPage() {
   }, [showQr]);
 
   const handleTapToOpen = async (door_id: string) => {
-    console.log('sc.res.access.open_initiated', { door_id });
-    const result = 'granted'; // 'granted' or 'denied'
-    
-    if (firestore) {
-      try {
-        await addDoc(collection(firestore, 'accessLogs'), {
-          name: "Resident User",
-          location: door_id === 'main-entrance' ? "Main Entrance" : "Garage Door",
-          time: "Just now",
-          status: result
+    console.log("sc.res.access.open_initiated", { door_id });
+    try {
+      const door =
+        doorsData?.find((d) => d.id === door_id) ??
+        doorsData?.find((d) => d.name.toLowerCase().includes("main")) ??
+        doorsData?.[0];
+      if (!door) {
+        toast({
+          title: "No doors available",
+          description: "Seed the backend or assign a site role first.",
+          variant: "destructive",
         });
-      } catch (e) {
-        console.error("Error writing access log:", e);
+        return;
       }
+      const { accessLog } = await client.unlockDoor(door.id, "granted");
+      await refresh();
+      console.log("sc.res.access.open_result", { door_id: door.id, accessLog });
+      toast({
+        title: "Success",
+        description: "Gate opened successfully. Entry recorded in history.",
+      });
+    } catch (e) {
+      console.error("Error unlocking door:", e);
+      toast({
+        title: "Unlock failed",
+        description: e instanceof Error ? e.message : "Unable to open door",
+        variant: "destructive",
+      });
     }
-
-    console.log('sc.res.access.open_result', { door_id, result });
-    toast({
-      title: "Success",
-      description: `Gate opened successfully. Result: ${result}. Entry recorded in history.`,
-    });
   };
 
   return (
