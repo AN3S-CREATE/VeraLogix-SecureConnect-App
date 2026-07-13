@@ -16,6 +16,7 @@ const envSchema = z.object({
   KEYCLOAK_WEB_CLIENT_ID: z.string().default('secureconnect-web'),
   KEYCLOAK_ADMIN_USERNAME: z.string().optional(),
   KEYCLOAK_ADMIN_PASSWORD: z.string().optional(),
+  KEYCLOAK_ADMIN_REALM: z.string().default('master'),
 
   MINIO_ENDPOINT: z.string().min(1),
   MINIO_PORT: z.coerce.number().default(9000),

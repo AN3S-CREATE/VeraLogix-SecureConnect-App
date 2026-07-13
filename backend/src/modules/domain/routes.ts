@@ -7,8 +7,10 @@ import { registerCrudRoutes } from '../../lib/crud-factory.js';
 import { NonEmptyString, UuidSchema } from '../../lib/pagination.js';
 import { RoleSchema } from '../../lib/roles.js';
 import { NotFoundError } from '../../lib/errors.js';
+import { cacheSet, cacheDel } from '../../lib/cache.js';
+import type { Env } from '../../config/env.js';
 
-export type DomainOpts = { db: Db };
+export type DomainOpts = { db: Db; env?: Env };
 
 const domainRoutes: FastifyPluginAsync<DomainOpts> = async (app, opts) => {
   const { db } = opts;
@@ -86,6 +88,11 @@ const domainRoutes: FastifyPluginAsync<DomainOpts> = async (app, opts) => {
         location: door.name,
       })
       .returning();
+
+    if (opts.env) {
+      await cacheDel(opts.env, `doors:site:${door.siteId}`);
+      await cacheSet(opts.env, `door:${door.id}`, updated, 30);
+    }
 
     await app.audit({
       actorId: req.authUser!.id,

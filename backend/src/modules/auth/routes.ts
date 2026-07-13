@@ -5,8 +5,9 @@ import type { Env } from '../../config/env.js';
 import { keycloakTokenUrl, keycloakLogoutUrl } from '../../config/env.js';
 import type { Db } from '../../db/client.js';
 import { users, userSiteRoles, consents } from '../../db/schema.js';
+import { createKeycloakUser, sendKeycloakPasswordReset } from '../../lib/keycloak-admin.js';
 import { EmailSchema, NonEmptyString } from '../../lib/pagination.js';
-import { UnauthorizedError, ValidationError } from '../../lib/errors.js';
+import { UnauthorizedError } from '../../lib/errors.js';
 import { RoleSchema } from '../../lib/roles.js';
 import { withBackoff } from '../../lib/utils.js';
 
@@ -23,6 +24,14 @@ const RefreshBody = z.object({
 
 const MagicLinkBody = z.object({
   email: EmailSchema,
+});
+
+const RegisterBody = z.object({
+  email: EmailSchema,
+  password: z.string().min(8).max(200),
+  name: NonEmptyString,
+  consentPurpose: NonEmptyString.default('account'),
+  consentVersion: z.string().default('1.0'),
 });
 
 const ConsentBody = z.object({
@@ -80,7 +89,6 @@ const authRoutes: FastifyPluginAsync<AuthOpts> = async (app, opts) => {
     });
     const tokens = await tokenRequest(params);
 
-    // Ensure local user exists via authenticate path
     req.headers.authorization = `Bearer ${tokens.access_token}`;
     await app.authenticate(req);
     const user = req.authUser!;
@@ -107,6 +115,107 @@ const authRoutes: FastifyPluginAsync<AuthOpts> = async (app, opts) => {
         siteIds: user.siteIds,
       },
     };
+  });
+
+  app.post('/api/v1/auth/register', {
+    config: { rateLimit: { max: env.AUTH_RATE_LIMIT_MAX, timeWindow: env.RATE_LIMIT_WINDOW_MS } },
+    schema: {
+      tags: ['auth'],
+      body: RegisterBody,
+      response: { 201: SessionResponse },
+    },
+  }, async (req, reply) => {
+    const body = RegisterBody.parse(req.body);
+    const kcUser = await createKeycloakUser(env, {
+      email: body.email,
+      password: body.password,
+      name: body.name,
+    });
+
+    const [localUser] = await db
+      .insert(users)
+      .values({
+        keycloakSub: kcUser.id || `pending-${body.email}`,
+        email: body.email,
+        name: body.name,
+      })
+      .onConflictDoUpdate({
+        target: users.email,
+        set: { name: body.name, updatedAt: new Date() },
+      })
+      .returning();
+
+    await db.insert(consents).values({
+      userId: localUser.id,
+      purpose: body.consentPurpose,
+      version: body.consentVersion,
+    });
+
+    // Attempt immediate login (may fail until email verified depending on realm settings)
+    try {
+      const params = new URLSearchParams({
+        grant_type: 'password',
+        client_id: env.KEYCLOAK_WEB_CLIENT_ID,
+        username: body.email,
+        password: body.password,
+        scope: 'openid profile email offline_access',
+      });
+      const tokens = await tokenRequest(params);
+      req.headers.authorization = `Bearer ${tokens.access_token}`;
+      await app.authenticate(req);
+      const user = req.authUser!;
+
+      await app.audit({
+        actorId: user.id,
+        action: 'auth.register',
+        resourceType: 'user',
+        resourceId: user.id,
+        correlationId: req.correlationId,
+        payload: { email: body.email },
+      });
+
+      return reply.code(201).send({
+        accessToken: String(tokens.access_token),
+        refreshToken: tokens.refresh_token ? String(tokens.refresh_token) : undefined,
+        expiresIn: typeof tokens.expires_in === 'number' ? tokens.expires_in : undefined,
+        tokenType: 'Bearer',
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          roles: user.roles,
+          siteIds: user.siteIds,
+        },
+      });
+    } catch {
+      await app.audit({
+        actorId: localUser.id,
+        action: 'auth.register_pending_verification',
+        resourceType: 'user',
+        resourceId: localUser.id,
+        correlationId: req.correlationId,
+      });
+      return reply.code(201).send({
+        accessToken: '',
+        tokenType: 'Bearer',
+        user: {
+          id: localUser.id,
+          email: localUser.email,
+          name: localUser.name,
+          roles: [],
+          siteIds: [],
+        },
+      });
+    }
+  });
+
+  app.post('/api/v1/auth/password-reset', {
+    config: { rateLimit: { max: env.AUTH_RATE_LIMIT_MAX, timeWindow: env.RATE_LIMIT_WINDOW_MS } },
+    schema: { tags: ['auth'], body: MagicLinkBody },
+  }, async (req) => {
+    const body = MagicLinkBody.parse(req.body);
+    await sendKeycloakPasswordReset(env, body.email);
+    return { ok: true, message: 'If the account exists, a password reset email will be sent.' };
   });
 
   app.post('/api/v1/auth/refresh', {
@@ -166,34 +275,13 @@ const authRoutes: FastifyPluginAsync<AuthOpts> = async (app, opts) => {
     schema: { tags: ['auth'], body: MagicLinkBody },
   }, async (req) => {
     const body = MagicLinkBody.parse(req.body);
-    // Keycloak magic link typically requires custom authenticator; enqueue email job as placeholder.
     const { emailQueue } = await import('../../jobs/queues.js');
     await emailQueue(env).add('magic-link', {
       to: body.email,
       subject: 'SecureConnect sign-in link',
-      text: `Request a magic link via Keycloak email OTP / magic-link authenticator for ${body.email}. Configure KEYCLOAK magic-link SPI for production.`,
+      text: `Sign in was requested for ${body.email}. Configure Keycloak magic-link / email OTP authenticator for production deep links.`,
     });
     return { ok: true, message: 'If the account exists, a sign-in email will be sent.' };
-  });
-
-  app.post('/api/v1/auth/register', {
-    config: { rateLimit: { max: env.AUTH_RATE_LIMIT_MAX, timeWindow: env.RATE_LIMIT_WINDOW_MS } },
-    schema: {
-      tags: ['auth'],
-      body: z.object({
-        email: EmailSchema,
-        password: z.string().min(8).max(200),
-        name: NonEmptyString,
-        consentPurpose: NonEmptyString.default('account'),
-        consentVersion: z.string().default('1.0'),
-      }),
-    },
-  }, async (req, reply) => {
-    // Registration is delegated to Keycloak; document that public registration is enabled on realm.
-    // For API-driven register we use password grant after Keycloak admin create — simplified: instruct client to use KC.
-    throw new ValidationError(
-      'Use Keycloak registration or POST /auth/login after admin creates the user. Public self-register is enabled on the Keycloak realm UI.',
-    );
   });
 
   app.post('/api/v1/auth/consent', {
@@ -220,7 +308,6 @@ const authRoutes: FastifyPluginAsync<AuthOpts> = async (app, opts) => {
     return row;
   });
 
-  // Dev bypass session for local UI without Keycloak
   app.post('/api/v1/auth/dev-session', {
     schema: { tags: ['auth'] },
   }, async (req, reply) => {

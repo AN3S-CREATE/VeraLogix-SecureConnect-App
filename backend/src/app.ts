@@ -72,7 +72,7 @@ export async function buildApp() {
 
   await app.register(healthRoutes, { env, db, pool });
   await app.register(authRoutes, { env, db });
-  await app.register(domainRoutes, { db });
+  await app.register(domainRoutes, { db, env });
   await app.register(filesRoutes, { env, db });
   await app.register(adminRoutes, { env, db });
   await app.register(popiaRoutes, { env, db });

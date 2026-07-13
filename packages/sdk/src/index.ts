@@ -115,6 +115,28 @@ export class SecureConnectClient {
     return session;
   }
 
+  async register(input: {
+    email: string;
+    password: string;
+    name: string;
+    consentPurpose?: string;
+    consentVersion?: string;
+  }): Promise<Session> {
+    const session = await this.request<Session>('/api/v1/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+    if (session.accessToken) this.setTokens(session.accessToken, session.refreshToken);
+    return session;
+  }
+
+  async requestPasswordReset(email: string) {
+    return this.request<{ ok: boolean; message: string }>('/api/v1/auth/password-reset', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
   async devSession(): Promise<Session> {
     const session = await this.request<Session>('/api/v1/auth/dev-session', { method: 'POST' });
     this.setTokens(session.accessToken, session.refreshToken);
