@@ -93,7 +93,12 @@ export class SecureConnectClient {
     }
 
     const text = await res.text();
-    const body = text ? (JSON.parse(text) as unknown) : null;
+    let body: unknown = null;
+    try {
+      body = text ? (JSON.parse(text) as unknown) : null;
+    } catch {
+      body = text;
+    }
     if (!res.ok) {
       const err = body as { error?: { code?: string; message?: string; details?: unknown } } | null;
       throw new ApiError(
@@ -104,7 +109,6 @@ export class SecureConnectClient {
       );
     }
     return body as T;
-  }
 
   async login(email: string, password: string): Promise<Session> {
     const session = await this.request<Session>('/api/v1/auth/login', {
