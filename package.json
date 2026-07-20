@@ -2,15 +2,28 @@
   "name": "veralogix-secureconnect",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "backend",
+    "packages/sdk"
+  ],
   "scripts": {
     "dev": "next dev --turbopack -p 9002",
+    "dev:api": "npm run dev --workspace=@veralogix/secureconnect-api",
+    "dev:worker": "npm run dev:worker --workspace=@veralogix/secureconnect-api",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "next build",
+    "build:api": "npm run build --workspace=@veralogix/secureconnect-api",
     "analyze": "cross-env ANALYZE=true next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "typecheck:api": "npm run typecheck --workspace=@veralogix/secureconnect-api",
+    "test:api": "npm run test --workspace=@veralogix/secureconnect-api",
+    "docker:up": "docker compose -f docker/docker-compose.yml up --build",
+    "docker:down": "docker compose -f docker/docker-compose.yml down",
+    "db:migrate": "npm run db:migrate --workspace=@veralogix/secureconnect-api",
+    "db:seed": "npm run db:seed --workspace=@veralogix/secureconnect-api"
   },
   "dependencies": {
     "@genkit-ai/google-genai": "^1.20.0",
@@ -42,7 +55,6 @@
     "date-fns": "^3.6.0",
     "dotenv": "^16.5.0",
     "embla-carousel-react": "^8.6.0",
-    "firebase": "^11.9.1",
     "genkit": "^1.20.0",
     "lucide-react": "^0.475.0",
     "next": "15.3.8",

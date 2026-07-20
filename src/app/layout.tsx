@@ -1,14 +1,13 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { FirebaseClientProvider } from '@/firebase';
+import { BackendClientProvider } from '@/backend';
+import { PrototypeSeeder } from '@/components/prototype-seeder';
 
 export const metadata: Metadata = {
   title: 'VeraLogix SecureConnect™',
   description: 'Secure platform for Agents, Trustees, Vendors, and Residents.',
 };
-
-import { PrototypeSeeder } from '@/components/prototype-seeder';
 
 export default function RootLayout({
   children,
@@ -23,10 +22,10 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased" style={{ lineHeight: '1.5' }}>
-        <FirebaseClientProvider>
+        <BackendClientProvider>
           <PrototypeSeeder />
           {children}
-        </FirebaseClientProvider>
+        </BackendClientProvider>
         <Toaster />
       </body>
     </html>
