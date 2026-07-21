@@ -100,7 +100,7 @@ async function main() {
 
       log.info({ requestId, userId }, 'POPIA deletion completed');
     },
-    { connection, attempts: 5 },
+    { connection },
   );
 
   new Worker(

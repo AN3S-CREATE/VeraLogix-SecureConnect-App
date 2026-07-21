@@ -109,6 +109,7 @@ export class SecureConnectClient {
       );
     }
     return body as T;
+  }
 
   async login(email: string, password: string): Promise<Session> {
     const session = await this.request<Session>('/api/v1/auth/login', {
