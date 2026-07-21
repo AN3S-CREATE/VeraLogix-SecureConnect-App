@@ -9,25 +9,67 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { FilePlus2, Filter, Download, ShieldAlert } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
-import type { Ticket } from "@/lib/entities";
+import { useAuthClient, useBackend, useCollection } from "@/backend";
+import { useToast } from "@/hooks/use-toast";
+import type { Incident } from "@/lib/entities";
+
+type IncidentRow = Incident & { siteId: string };
+
+type DisplayIncident = {
+  id: string;
+  desc: string;
+  severity: "critical" | "high" | "medium" | "low";
+  status: string;
+  assignee: string;
+  sla: number;
+};
+
+function incidentDescription(row: IncidentRow) {
+  return row.evidence?.[0] || `Incident ${row.id.slice(0, 8)}`;
+}
+
+function incidentAssignee(row: IncidentRow) {
+  const tag = row.evidence?.find((e) => e.startsWith("assignee:"));
+  return tag ? tag.replace("assignee:", "") : "Unassigned";
+}
+
+function slaPercent(deadline: string) {
+  const remaining = new Date(deadline).getTime() - Date.now();
+  const windowMs = 4 * 60 * 60 * 1000;
+  const pct = Math.round(Math.max(0, Math.min(100, (remaining / windowMs) * 100)));
+  return Number.isFinite(pct) ? pct : 0;
+}
 
 export default function IncidentsPage() {
-    // For a complete demo, we will use mock data.
-    // The Firestore hooks have been removed to ensure the page is always populated.
-    const isLoading = false;
-    
-    const initialIncidents: Ticket[] = [
-        { id: 'INC-001', unitId: 'Lobby', category: 'Access', desc: 'Unauthorised access attempt on main entrance.', status: 'New', slaDeadline: '2024-08-01T12:00:00Z', timeline: [], severity: 'high', assignee: 'Unassigned', sla: 95 },
-        { id: 'INC-002', unitId: 'Sector 4', category: 'Perimeter', desc: 'Perimeter fence breach detected near Sector 4.', status: 'Assigned', slaDeadline: '2024-08-01T11:00:00Z', timeline: [], severity: 'critical', assignee: 'John Doe', sla: 80 },
-        { id: 'INC-003', unitId: 'Garage P2', category: 'CCTV', desc: 'CCTV camera offline in parking garage P2.', status: 'New', slaDeadline: '2024-08-02T18:00:00Z', timeline: [], severity: 'medium', assignee: 'Unassigned', sla: 100 },
-        { id: 'INC-004', unitId: 'Unit 301', category: 'Alarm', desc: 'False fire alarm triggered.', status: 'Closed', slaDeadline: '2024-07-31T10:00:00Z', timeline: [], severity: 'low', assignee: 'Jane Smith', sla: 100 },
-    ];
-    
-    const [displayData, setDisplayData] = useState<Ticket[]>(initialIncidents);
-    const [selectedIncident, setSelectedIncident] = useState<Ticket | null>(initialIncidents[0] || null);
-    
+    const { user } = useBackend();
+    const client = useAuthClient();
+    const { toast } = useToast();
+    const { data, isLoading, refresh } = useCollection<IncidentRow>("incidents", {
+      realtimeTable: "incidents",
+    });
+
+    const displayData = useMemo<DisplayIncident[]>(
+      () =>
+        (data ?? []).map((row) => ({
+          id: row.id,
+          desc: incidentDescription(row),
+          severity: row.severity,
+          status: row.status,
+          assignee: incidentAssignee(row),
+          sla: slaPercent(row.slaDeadline),
+        })),
+      [data],
+    );
+
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const selectedIncident = displayData.find((i) => i.id === selectedId) ?? displayData[0] ?? null;
+
+    useEffect(() => {
+      if (!selectedId && displayData[0]) setSelectedId(displayData[0].id);
+    }, [displayData, selectedId]);
+
     const severityConfig = {
         critical: { label: 'Critical', className: 'bg-red-500/20 text-red-400 border-red-500/50' },
         high: { label: 'High', className: 'bg-orange-500/20 text-orange-400 border-orange-500/50' },
@@ -35,14 +77,64 @@ export default function IncidentsPage() {
         low: { label: 'Low', className: 'bg-blue-500/20 text-blue-400 border-blue-500/50' },
     } as const;
 
-    const handleAssign = (assignee: string) => {
+    const patchIncident = async (
+      id: string,
+      patch: { status?: string; evidence?: string[] },
+      success: string,
+    ) => {
+      try {
+        await client.update("incidents", id, patch);
+        await refresh();
+        toast({ title: success });
+      } catch (err) {
+        toast({
+          title: "Update failed",
+          description: err instanceof Error ? err.message : "Unable to update incident",
+          variant: "destructive",
+        });
+      }
+    };
+
+    const handleAssign = async (assignee: string) => {
         if (!selectedIncident) return;
-        console.log('sc.agent.incidents.assign', { incidentId: selectedIncident.id, assignee });
+        const row = data?.find((r) => r.id === selectedIncident.id);
+        const evidence = [...(row?.evidence ?? []).filter((e) => !e.startsWith("assignee:")), `assignee:${assignee}`];
+        await patchIncident(selectedIncident.id, { status: "assigned", evidence }, `Assigned to ${assignee}`);
     };
     
-    const handleResolve = () => {
+    const handleResolve = async () => {
         if (!selectedIncident) return;
-        console.log('sc.agent.incidents.resolve', { incidentId: selectedIncident.id });
+        await patchIncident(selectedIncident.id, { status: "closed" }, "Incident resolved");
+    };
+
+    const handleCreate = async () => {
+      const siteId = user?.siteIds[0];
+      if (!siteId) {
+        toast({
+          title: "No site access",
+          description: "Log in with an agent or admin account that has a site assignment.",
+          variant: "destructive",
+        });
+        return;
+      }
+      const deadline = new Date(Date.now() + 4 * 60 * 60 * 1000);
+      try {
+        await client.create("incidents", {
+          siteId,
+          severity: "medium",
+          status: "open",
+          slaDeadline: deadline.toISOString(),
+          evidence: ["Manual incident created from agent console"],
+        });
+        await refresh();
+        toast({ title: "Incident created" });
+      } catch (err) {
+        toast({
+          title: "Create failed",
+          description: err instanceof Error ? err.message : "Unable to create incident",
+          variant: "destructive",
+        });
+      }
     };
 
     return (
@@ -54,11 +146,11 @@ export default function IncidentsPage() {
                 </div>
 
                 <div className="vx-card p-0 flex-1 overflow-hidden">
-                   {isLoading && (!displayData || displayData.length === 0) ? (
+                   {isLoading && displayData.length === 0 ? (
                         <div className="h-full flex items-center justify-center">
                             <Spinner />
                         </div>
-                   ) : displayData && displayData.length > 0 ? (
+                   ) : displayData.length > 0 ? (
                         <div className="overflow-y-auto h-full">
                             <table className="w-full">
                                 <thead>
@@ -72,19 +164,24 @@ export default function IncidentsPage() {
                                 </thead>
                                 <tbody>
                                     {displayData.map((incident) => (
-                                        <tr key={incident.id} className="vx-table-row" data-state={incident.id === selectedIncident?.id ? 'selected' : 'unselected'} onClick={() => setSelectedIncident(incident)}>
+                                        <tr
+                                          key={incident.id}
+                                          className="vx-table-row cursor-pointer"
+                                          data-state={incident.id === selectedIncident?.id ? 'selected' : 'unselected'}
+                                          onClick={() => setSelectedId(incident.id)}
+                                        >
                                             <td className="p-4"><Checkbox id={`select-${incident.id}`} aria-label={`Select incident ${incident.id}`} className="vx-focus" /></td>
                                             <td className="p-4">
-                                                <span className={cn("px-2 py-1 text-xs font-semibold rounded-full border", severityConfig[incident.severity as keyof typeof severityConfig]?.className)}>
-                                                    {severityConfig[incident.severity as keyof typeof severityConfig]?.label}
+                                                <span className={cn("px-2 py-1 text-xs font-semibold rounded-full border", severityConfig[incident.severity]?.className)}>
+                                                    {severityConfig[incident.severity]?.label}
                                                 </span>
                                             </td>
                                             <td className="p-4 max-w-sm truncate">{incident.desc}</td>
-                                            <td className="p-4">{incident.assignee || 'Unassigned'}</td>
+                                            <td className="p-4">{incident.assignee}</td>
                                             <td className="p-4">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-8 text-right text-sm">{incident.sla || 0}%</div>
-                                                    <div className={cn("h-2 w-2 rounded-full", incident.sla && incident.sla > 80 ? "bg-neon-3 animate-pulse" : "bg-neon-2")}></div>
+                                                    <div className="w-8 text-right text-sm">{incident.sla}%</div>
+                                                    <div className={cn("h-2 w-2 rounded-full", incident.sla > 80 ? "bg-neon-3 animate-pulse" : "bg-neon-2")}></div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -97,7 +194,7 @@ export default function IncidentsPage() {
                             <ShieldAlert className="w-16 h-16 text-muted-foreground mb-4" />
                             <h3 className="text-lg font-semibold">No Open Incidents</h3>
                             <p className="text-sm text-muted-foreground mb-4">The incident queue is clear. Well done.</p>
-                            <Button className="vx-cta vx-focus">Create Manual Incident</Button>
+                            <Button className="vx-cta vx-focus" onClick={() => void handleCreate()}>Create Manual Incident</Button>
                         </div>
                    )}
                 </div>
@@ -107,13 +204,17 @@ export default function IncidentsPage() {
                 {selectedIncident ? (
                     <>
                         <div>
-                            <h2 className="text-xl font-bold">Playbook: {selectedIncident.id}</h2>
+                            <h2 className="text-xl font-bold">Playbook: {selectedIncident.id.slice(0, 8)}</h2>
                             <p className="text-muted-foreground text-sm">{selectedIncident.desc}</p>
+                            <p className="text-xs text-muted-foreground mt-1">Status: {selectedIncident.status}</p>
                         </div>
 
                         <div className="space-y-4">
                             <h3 className="font-semibold">Assign</h3>
-                             <Select defaultValue={selectedIncident.assignee && selectedIncident.assignee !== 'Unassigned' ? selectedIncident.assignee : undefined} onValueChange={handleAssign}>
+                             <Select
+                               value={selectedIncident.assignee !== "Unassigned" ? selectedIncident.assignee : undefined}
+                               onValueChange={(v) => void handleAssign(v)}
+                             >
                                 <SelectTrigger className="w-full vx-focus">
                                     <SelectValue placeholder="Select an assignee" />
                                 </SelectTrigger>
@@ -145,12 +246,12 @@ export default function IncidentsPage() {
                         <div className="space-y-2">
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <Button className="w-full vx-cta vx-focus">Resolve Incident</Button>
+                                    <Button className="w-full vx-cta vx-focus" disabled={selectedIncident.status === "closed"}>Resolve Incident</Button>
                                 </DialogTrigger>
                                 <DialogContent className="sm:max-w-lg bg-background border-white/10">
                                     <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[var(--neon-2)] to-transparent"></div>
                                     <DialogHeader>
-                                        <DialogTitle>Resolve Incident: {selectedIncident.id}</DialogTitle>
+                                        <DialogTitle>Resolve Incident: {selectedIncident.id.slice(0, 8)}</DialogTitle>
                                         <DialogDescription>
                                             Verify evidence, select an outcome, and add final notes to resolve this incident.
                                         </DialogDescription>
@@ -186,7 +287,7 @@ export default function IncidentsPage() {
                                               <Button variant="secondary" className="vx-focus">Cancel</Button>
                                             </DialogClose>
                                             <DialogClose asChild>
-                                              <Button className="vx-cta vx-focus ml-2" onClick={handleResolve}>Confirm Resolution</Button>
+                                              <Button className="vx-cta vx-focus ml-2" onClick={() => void handleResolve()}>Confirm Resolution</Button>
                                             </DialogClose>
                                         </div>
                                     </DialogFooter>

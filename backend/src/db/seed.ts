@@ -10,6 +10,7 @@ import {
   accessLogs,
   amenities,
   passes,
+  incidents,
 } from './db/schema.js';
 import { eq } from 'drizzle-orm';
 
@@ -108,6 +109,37 @@ async function seed() {
         end,
         status: 'active',
       });
+    }
+
+    const existingIncidents = await db.select().from(incidents).where(eq(incidents.siteId, site.id)).limit(1);
+    if (!existingIncidents.length) {
+      const sla = new Date(Date.now() + 4 * 60 * 60 * 1000);
+      await db.insert(incidents).values([
+        {
+          siteId: site.id,
+          severity: 'high',
+          status: 'open',
+          slaDeadline: sla,
+          evidence: ['Unauthorised access attempt on main entrance.'],
+        },
+        {
+          siteId: site.id,
+          severity: 'critical',
+          status: 'assigned',
+          slaDeadline: sla,
+          evidence: [
+            'Perimeter fence breach detected near Sector 4.',
+            'assignee:John Doe',
+          ],
+        },
+        {
+          siteId: site.id,
+          severity: 'medium',
+          status: 'open',
+          slaDeadline: new Date(Date.now() + 8 * 60 * 60 * 1000),
+          evidence: ['CCTV camera offline in parking garage P2.'],
+        },
+      ]);
     }
 
     log.info('Seed complete');
