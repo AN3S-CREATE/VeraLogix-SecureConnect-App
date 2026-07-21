@@ -3,7 +3,7 @@ import type { Env } from '../../config/env.js';
 import type { Db } from '../../db/client.js';
 import { checkDb } from '../../db/client.js';
 import type pg from 'pg';
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { S3Client, HeadBucketCommand } from '@aws-sdk/client-s3';
 
 export type HealthOpts = {

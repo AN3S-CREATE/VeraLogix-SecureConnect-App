@@ -25,3 +25,9 @@
 
 **Decision:** Genkit dependencies present; no production flows yet.  
 **Rationale:** README marks AI as optional post-cutover work.
+
+## ADR-006: CI uses root workspace lockfile + scoped typecheck
+
+**Date:** 2026-07-21  
+**Decision:** All Actions jobs run `npm ci` at repo root; root `tsconfig` excludes `backend/`; Backend CI typechecks the API workspace separately; coverage thresholds apply only to unit-covered lib modules.  
+**Rationale:** Fixes broken `backend/package-lock.json` cache path, prevents NodeNext/bundler clash in one `tsc`, and keeps coverage gates honest for the unit suite.

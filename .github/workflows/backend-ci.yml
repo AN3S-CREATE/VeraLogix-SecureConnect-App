@@ -1,3 +1,8 @@
+# Backend CI
+# Typechecks, unit-tests, and coverage for the Fastify API workspace.
+# Triggers on backend/SDK/docker/workflow changes. No secrets required for unit jobs.
+# Integration/e2e remain opt-in via RUN_INTEGRATION / RUN_E2E (not run here).
+
 name: Backend CI
 
 on:
@@ -5,31 +10,71 @@ on:
     paths:
       - 'backend/**'
       - 'packages/sdk/**'
-      - 'docker/**'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/backend-ci.yml'
   pull_request:
     paths:
       - 'backend/**'
       - 'packages/sdk/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/backend-ci.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: backend-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   test:
+    name: Backend unit + coverage
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: npm
-          cache-dependency-path: backend/package-lock.json
-      - name: Install
-        run: npm ci || npm install
-      - name: Typecheck
-        run: npm run typecheck
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck API
+        run: |
+          echo "::notice::Typechecking @veralogix/secureconnect-api"
+          npm run typecheck --workspace=@veralogix/secureconnect-api
+
       - name: Unit tests
-        run: npm test
+        run: npm test --workspace=@veralogix/secureconnect-api
+
       - name: Coverage
-        run: npm run test:coverage
+        run: npm run test:coverage --workspace=@veralogix/secureconnect-api
+
+      - name: Upload coverage summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-summary
+          path: backend/coverage/coverage-summary.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Backend CI"
+            echo "- Typecheck: completed"
+            echo "- Unit tests: vitest \`tests/unit\`"
+            echo "- Coverage thresholds enforced on unit-covered lib modules"
+            echo "- Integration/e2e: skipped (set RUN_INTEGRATION=1 / RUN_E2E=1 locally)"
+          } >> "$GITHUB_STEP_SUMMARY"

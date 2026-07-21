@@ -1,6 +1,6 @@
-import { loadEnv } from './config/env.js';
-import { createLogger } from './config/logger.js';
-import { createDb } from './db/client.js';
+import { loadEnv } from '../config/env.js';
+import { createLogger } from '../config/logger.js';
+import { createDb } from './client.js';
 import {
   sites,
   units,
@@ -11,7 +11,7 @@ import {
   amenities,
   passes,
   incidents,
-} from './db/schema.js';
+} from './schema.js';
 import { eq } from 'drizzle-orm';
 
 async function seed() {
@@ -74,11 +74,11 @@ async function seed() {
         .returning();
 
       await db.insert(accessLogs).values(
-        created.map((d, i) => ({
+        created.map((d: { id: string; name: string }, i: number) => ({
           siteId: site.id,
           doorId: d.id,
           userId: admin.id,
-          result: i % 2 === 0 ? 'granted' : 'denied',
+          result: (i % 2 === 0 ? 'granted' : 'denied') as 'granted' | 'denied',
           name: admin.name,
           location: d.name,
         })),

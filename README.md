@@ -32,6 +32,7 @@
 - [See It In Action](#-see-it-in-action)
 - [How VeraLogix Transforms Communities](#-how-veralogix-transforms-communities)
 - [Architecture & Tech Stack](#-architecture--tech-stack)
+- [CI](#-ci)
 - [Roadmap](#-roadmap)
 - [Contributing](#-contributing)
 - [License & Community](#-license--community)
@@ -72,10 +73,24 @@ npm run dev
 ```
 
 > App UI: `http://localhost:9002` · API docs: `http://localhost:3000/docs`  
-> See [`backend/README.md`](backend/README.md) and [`docs/migration-firebase.md`](docs/migration-firebase.md).
+> See [`backend/README.md`](backend/README.md), [`docs/ci.md`](docs/ci.md), and [`docs/migration-firebase.md`](docs/migration-firebase.md).
 
 Demo login (Keycloak): `admin@veralogix.com` / `secureconnect`  
 Local API bypass: set `NEXT_PUBLIC_DEV_AUTH_BYPASS=true` and `DEV_AUTH_BYPASS=true`.
+
+---
+
+## 🧪 CI
+
+GitHub Actions runs typecheck, backend unit tests/coverage, and a **CI Health** aggregator on `main` / PRs. No secrets are required.
+
+```bash
+npm ci
+npm run typecheck
+npm test --workspace=@veralogix/secureconnect-api
+```
+
+Full local parity, troubleshooting, and branch-protection check names: [`docs/ci.md`](docs/ci.md).
 
 ---
 

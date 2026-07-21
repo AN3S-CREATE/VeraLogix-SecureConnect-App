@@ -1,5 +1,5 @@
-import type { FastifyInstance, FastifyPluginAsync, RouteHandlerMethod } from 'fastify';
-import { and, eq, gt, isNull, SQL } from 'drizzle-orm';
+import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
+import { and, eq, gt, isNull, type SQL } from 'drizzle-orm';
 import type { PgTable, TableConfig } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 import type { Db } from '../db/client.js';
@@ -8,11 +8,20 @@ import { NotFoundError, ForbiddenError } from '../lib/errors.js';
 import { isAdmin, type Role } from '../lib/roles.js';
 
 type AnyTable = PgTable<TableConfig> & {
-  id: { name: string };
-  siteId?: { name: string };
-  deletedAt?: { name: string };
-  createdAt?: { name: string };
+  // Generic factory accepts any Drizzle PG table; column typing is intentionally loose.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  id: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  siteId?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  deletedAt?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  createdAt?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  updatedAt?: any;
 };
+
+type Row = Record<string, unknown>;
 
 export type CrudFactoryOpts<TCreate extends z.ZodTypeAny, TUpdate extends z.ZodTypeAny> = {
   prefix: string;
@@ -23,7 +32,7 @@ export type CrudFactoryOpts<TCreate extends z.ZodTypeAny, TUpdate extends z.ZodT
   db: Db;
   readRoles?: Role[];
   writeRoles?: Role[];
-  mapRow?: (row: Record<string, unknown>) => Record<string, unknown>;
+  mapRow?: (row: Row) => Row;
 };
 
 export function registerCrudRoutes<TCreate extends z.ZodTypeAny, TUpdate extends z.ZodTypeAny>(
@@ -55,10 +64,10 @@ export function registerCrudRoutes<TCreate extends z.ZodTypeAny, TUpdate extends
     const conditions: SQL[] = [];
 
     if (hasSoftDelete) {
-      conditions.push(isNull((table as { deletedAt: typeof table.deletedAt }).deletedAt!));
+      conditions.push(isNull(table.deletedAt!));
     }
     if (hasSite) {
-      const siteCol = (table as { siteId: typeof table.siteId }).siteId!;
+      const siteCol = table.siteId!;
       if (query.siteId) {
         if (!isAdmin(user.roles) && !user.siteIds.includes(query.siteId)) {
           throw new ForbiddenError('No access to this site');
@@ -70,25 +79,25 @@ export function registerCrudRoutes<TCreate extends z.ZodTypeAny, TUpdate extends
       }
     }
     if (query.cursor) {
-      conditions.push(gt(table.id as never, query.cursor));
+      conditions.push(gt(table.id, query.cursor));
     }
 
-    let rows = await db
+    let rows = (await db
       .select()
-      .from(table as never)
+      .from(table)
       .where(conditions.length ? and(...conditions) : undefined)
-      .orderBy(table.id as never)
-      .limit(query.limit + 1);
+      .orderBy(table.id)
+      .limit(query.limit + 1)) as Row[];
 
     if (hasSite && !query.siteId && !isAdmin(user.roles)) {
-      rows = rows.filter((r) => user.siteIds.includes((r as { siteId: string }).siteId));
+      rows = rows.filter((r) => user.siteIds.includes(String(r.siteId)));
     }
 
     const hasMore = rows.length > query.limit;
     const page = hasMore ? rows.slice(0, query.limit) : rows;
-    const nextCursor = hasMore ? String((page[page.length - 1] as { id: string }).id) : null;
+    const nextCursor = hasMore ? String(page[page.length - 1]?.id) : null;
     return {
-      data: page.map((r) => mapRow(r as Record<string, unknown>)),
+      data: page.map((r) => mapRow(r)),
       meta: { nextCursor, limit: query.limit },
     };
   });
@@ -98,36 +107,39 @@ export function registerCrudRoutes<TCreate extends z.ZodTypeAny, TUpdate extends
     preHandler: [app.requireRoles(readRoles)],
   }, async (req) => {
     const { id } = z.object({ id: z.string().uuid() }).parse(req.params);
-    const [row] = await db.select().from(table as never).where(eq(table.id as never, id)).limit(1);
-    if (!row || (hasSoftDelete && (row as { deletedAt?: Date | null }).deletedAt)) {
+    const found = (await db.select().from(table).where(eq(table.id, id)).limit(1)) as Row[];
+    const row = found[0];
+    if (!row || (hasSoftDelete && row.deletedAt)) {
       throw new NotFoundError(`${tag} not found`);
     }
     if (hasSite && !isAdmin(req.authUser!.roles)) {
-      const siteId = (row as { siteId: string }).siteId;
+      const siteId = String(row.siteId);
       if (!req.authUser!.siteIds.includes(siteId)) throw new ForbiddenError('No access');
     }
-    return mapRow(row as Record<string, unknown>);
+    return mapRow(row);
   });
 
   app.post(prefix, {
     schema: { tags: [tag], body: createSchema },
     preHandler: [app.requireRoles(writeRoles)],
   }, async (req) => {
-    const body = createSchema.parse(req.body) as Record<string, unknown>;
+    const body = createSchema.parse(req.body) as Row;
     if (hasSite && body.siteId) {
       await app.requireSiteAccess(req, String(body.siteId));
     }
-    const [row] = await db.insert(table as never).values(body as never).returning();
+    const inserted = (await db.insert(table).values(body as never).returning()) as Row[];
+    const row = inserted[0];
+    if (!row) throw new NotFoundError(`${tag} create failed`);
     await app.audit({
       actorId: req.authUser!.id,
       action: `${tag}.create`,
       resourceType: tag,
-      resourceId: String((row as { id: string }).id),
-      siteId: hasSite ? String((row as { siteId: string }).siteId) : undefined,
+      resourceId: String(row.id),
+      siteId: hasSite ? String(row.siteId) : undefined,
       correlationId: req.correlationId,
       payload: body,
     });
-    return mapRow(row as Record<string, unknown>);
+    return mapRow(row);
   });
 
   app.patch(`${prefix}/:id`, {
@@ -135,16 +147,19 @@ export function registerCrudRoutes<TCreate extends z.ZodTypeAny, TUpdate extends
     preHandler: [app.requireRoles(writeRoles)],
   }, async (req) => {
     const { id } = z.object({ id: z.string().uuid() }).parse(req.params);
-    const body = updateSchema.parse(req.body) as Record<string, unknown>;
-    const [existing] = await db.select().from(table as never).where(eq(table.id as never, id)).limit(1);
+    const body = updateSchema.parse(req.body) as Row;
+    const existingRows = (await db.select().from(table).where(eq(table.id, id)).limit(1)) as Row[];
+    const existing = existingRows[0];
     if (!existing) throw new NotFoundError(`${tag} not found`);
-    if (hasSite) await app.requireSiteAccess(req, (existing as { siteId: string }).siteId);
+    if (hasSite) await app.requireSiteAccess(req, String(existing.siteId));
 
-    const [row] = await db
-      .update(table as never)
+    const updated = (await db
+      .update(table)
       .set((hasUpdatedAt ? { ...body, updatedAt: new Date() } : body) as never)
-      .where(eq(table.id as never, id))
-      .returning();
+      .where(eq(table.id, id))
+      .returning()) as Row[];
+    const row = updated[0];
+    if (!row) throw new NotFoundError(`${tag} not found`);
     await app.audit({
       actorId: req.authUser!.id,
       action: `${tag}.update`,
@@ -153,7 +168,7 @@ export function registerCrudRoutes<TCreate extends z.ZodTypeAny, TUpdate extends
       correlationId: req.correlationId,
       payload: body,
     });
-    return mapRow(row as Record<string, unknown>);
+    return mapRow(row);
   });
 
   app.delete(`${prefix}/:id`, {
@@ -161,17 +176,18 @@ export function registerCrudRoutes<TCreate extends z.ZodTypeAny, TUpdate extends
     preHandler: [app.requireRoles(writeRoles)],
   }, async (req) => {
     const { id } = z.object({ id: z.string().uuid() }).parse(req.params);
-    const [existing] = await db.select().from(table as never).where(eq(table.id as never, id)).limit(1);
+    const existingRows = (await db.select().from(table).where(eq(table.id, id)).limit(1)) as Row[];
+    const existing = existingRows[0];
     if (!existing) throw new NotFoundError(`${tag} not found`);
-    if (hasSite) await app.requireSiteAccess(req, (existing as { siteId: string }).siteId);
+    if (hasSite) await app.requireSiteAccess(req, String(existing.siteId));
 
     if (hasSoftDelete) {
       await db
-        .update(table as never)
+        .update(table)
         .set({ deletedAt: new Date(), updatedAt: new Date() } as never)
-        .where(eq(table.id as never, id));
+        .where(eq(table.id, id));
     } else {
-      await db.delete(table as never).where(eq(table.id as never, id));
+      await db.delete(table).where(eq(table.id, id));
     }
     await app.audit({
       actorId: req.authUser!.id,
@@ -191,6 +207,3 @@ export function crudPlugin<TCreate extends z.ZodTypeAny, TUpdate extends z.ZodTy
     registerCrudRoutes(app, opts);
   };
 }
-
-/** Helper unused export to satisfy type imports in modules. */
-export type CrudHandler = RouteHandlerMethod;
