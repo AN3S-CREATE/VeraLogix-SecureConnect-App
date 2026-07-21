@@ -1,0 +1,69 @@
+# CI Health
+# Lightweight required-check aggregator. Confirms workflow wiring, Node tooling,
+# and a fast smoke assertion so branch protection can depend on a single green job.
+# Runs on push/PR to default branches and on manual dispatch. No secrets required.
+
+name: CI Health
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-health-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  health:
+    name: CI health summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Workflow self-check
+        run: |
+          set -euo pipefail
+          echo "::notice::Verifying workflow files and package scripts"
+          test -f .github/workflows/typecheck.yml
+          test -f .github/workflows/backend-ci.yml
+          test -f .github/workflows/ci-health.yml
+          test -f package-lock.json
+          node -e "const p=require('./package.json'); if(!p.scripts.typecheck) process.exit(1)"
+          node -e "const p=require('./backend/package.json'); if(!p.scripts.test) process.exit(1)"
+          npm run typecheck
+          npm test --workspace=@veralogix/secureconnect-api
+
+      - name: Write summary
+        run: |
+          {
+            echo "## CI Health"
+            echo ""
+            echo "| Check | Result |"
+            echo "|---|---|"
+            echo "| Workflows present | pass |"
+            echo "| Root lockfile | pass |"
+            echo "| Frontend/SDK typecheck | pass |"
+            echo "| Backend unit tests | pass |"
+            echo ""
+            echo "Use this job as a branch-protection required check."
+            echo ""
+            echo "Node: \`$(node -v)\` · npm: \`$(npm -v)\`"
+          } >> "$GITHUB_STEP_SUMMARY"

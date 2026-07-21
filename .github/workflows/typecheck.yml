@@ -1,26 +1,47 @@
+# Frontend Typecheck
+# Runs on every push/PR to main (and master). Validates Next.js + SDK TypeScript.
+# Does not require secrets. Uses the root npm workspace lockfile.
+
 name: Typecheck
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [main, master]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: typecheck-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   typecheck:
+    name: Frontend typecheck
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm install
-      
-    - name: Run Typecheck
-      run: npm run typecheck
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run typecheck
+        run: |
+          echo "::notice::Running root TypeScript check (frontend + SDK)"
+          npm run typecheck
+          echo "## Frontend typecheck" >> "$GITHUB_STEP_SUMMARY"
+          echo "Status: **passed**" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Node: $(node -v)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- TypeScript via workspace \`tsc --noEmit\`" >> "$GITHUB_STEP_SUMMARY"
