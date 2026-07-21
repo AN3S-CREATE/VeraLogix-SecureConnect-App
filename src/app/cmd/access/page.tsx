@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
-import { UserPlus, ShieldAlert, Timer, Map, List, KeyRound, RadioTower } from "lucide-react";
+import { UserPlus, ShieldAlert, Timer, KeyRound, RadioTower } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { useCollection } from "@/backend";
+import { useAuthClient, useCollection } from "@/backend";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 type DoorRow = {
   id: string;
@@ -30,20 +32,27 @@ type AccessLogRow = {
   createdAt?: string;
 };
 
+function mapDoorHealth(health: string): "healthy" | "degraded" | "offline" {
+  if (["healthy", "degraded", "offline"].includes(health)) {
+    return health as "healthy" | "degraded" | "offline";
+  }
+  if (health === "ok") return "healthy";
+  if (health === "warn") return "degraded";
+  return "offline";
+}
+
 export default function AccessControlPage() {
-  const { data: doorsData } = useCollection<DoorRow>("doors", { realtimeTable: "doors" });
+  const client = useAuthClient();
+  const { toast } = useToast();
+  const [busyDoorId, setBusyDoorId] = useState<string | null>(null);
+
+  const { data: doorsData, refresh: refreshDoors } = useCollection<DoorRow>("doors", { realtimeTable: "doors" });
   const doors = (doorsData || []).map((d) => ({
     ...d,
-    health: (["healthy", "degraded", "offline"].includes(d.health)
-      ? d.health
-      : d.health === "ok"
-        ? "healthy"
-        : d.health === "warn"
-          ? "degraded"
-          : "offline") as "healthy" | "degraded" | "offline",
+    health: mapDoorHealth(d.health),
   }));
 
-  const { data: logsData } = useCollection<AccessLogRow>("access-logs", {
+  const { data: logsData, refresh: refreshLogs } = useCollection<AccessLogRow>("access-logs", {
     realtimeTable: "access_logs",
   });
   const arrivalFeed = (logsData || []).map((log) => ({
@@ -54,12 +63,41 @@ export default function AccessControlPage() {
     status: log.result,
   }));
 
-  const handleOverride = () => {
-      console.log('sc.agent.access.override_initiated');
-      // Simulate API call
-      setTimeout(() => {
-          console.log('sc.agent.access.override_completed');
-      }, 1000);
+  const runDoorAction = async (doorId: string, action: "unlock" | "lock") => {
+    setBusyDoorId(doorId);
+    try {
+      if (action === "unlock") {
+        await client.unlockDoor(doorId, "granted");
+      } else {
+        await client.update("doors", doorId, { state: "locked" });
+      }
+      await Promise.all([refreshDoors(), refreshLogs()]);
+      toast({
+        title: action === "unlock" ? "Door unlocked" : "Door locked",
+        description: "Access event recorded in the audit trail.",
+      });
+    } catch (err) {
+      toast({
+        title: "Door action failed",
+        description: err instanceof Error ? err.message : "Unable to update door state",
+        variant: "destructive",
+      });
+    } finally {
+      setBusyDoorId(null);
+    }
+  };
+
+  const handleOverride = async () => {
+    const target = doors.find((d) => d.state === "locked") ?? doors[0];
+    if (!target) {
+      toast({
+        title: "No doors available",
+        description: "Seed the backend or check your site access.",
+        variant: "destructive",
+      });
+      return;
+    }
+    await runDoorAction(target.id, "unlock");
   };
 
   return (
@@ -84,7 +122,6 @@ export default function AccessControlPage() {
                              <div className="absolute inset-0 flex items-center justify-center">
                                  <p className="text-muted-foreground">Live Arrival Heatmap</p>
                              </div>
-                             {/* Example of a glowing active zone outline */}
                              <div 
                                 className="absolute" 
                                 style={{
@@ -100,7 +137,9 @@ export default function AccessControlPage() {
                         <div className="vx-card p-0 h-[400px] flex flex-col">
                             <h2 className="text-xl font-bold p-6 pb-2">Live Arrivals</h2>
                             <div className="overflow-y-auto px-6 flex-1">
-                                {arrivalFeed.map(item => (
+                                {arrivalFeed.length === 0 ? (
+                                  <p className="text-sm text-muted-foreground py-4">No recent access events.</p>
+                                ) : arrivalFeed.map(item => (
                                     <div key={item.id} className="py-3 border-b border-white/10 last:border-0 text-sm">
                                         <div className="flex justify-between items-center">
                                             <p className="font-semibold">{item.name}</p>
@@ -133,7 +172,16 @@ export default function AccessControlPage() {
                 <div className="lg:col-span-2">
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {doors.map((door) => (
-                        <DoorCard key={door.id} {...door} />
+                        <DoorCard
+                          key={door.id}
+                          id={door.id}
+                          name={door.name}
+                          state={door.state}
+                          health={door.health}
+                          busy={busyDoorId === door.id}
+                          onUnlock={(id) => void runDoorAction(id, "unlock")}
+                          onLock={(id) => void runDoorAction(id, "lock")}
+                        />
                     ))}
                     </div>
                 </div>
@@ -208,7 +256,7 @@ export default function AccessControlPage() {
                                       <Button variant="secondary">Cancel</Button>
                                     </DialogClose>
                                     <DialogClose asChild>
-                                      <Button variant="destructive" className="vx-focus" onClick={handleOverride}>Confirm & Override</Button>
+                                      <Button variant="destructive" className="vx-focus" onClick={() => void handleOverride()}>Confirm & Override</Button>
                                     </DialogClose>
                                 </DialogFooter>
                             </DialogContent>
