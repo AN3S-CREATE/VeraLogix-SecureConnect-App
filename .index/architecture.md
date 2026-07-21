@@ -39,6 +39,7 @@ Postgres Keycloak  MinIO     Redis     BullMQ worker
 - Local: `docker compose -f docker/docker-compose.yml up` + `npm run dev`
 - Edge: Caddy proxies API, Keycloak, MinIO
 - Observability: optional `--profile observability` for Prometheus/Grafana
+- CI: GitHub Actions — Typecheck, Backend CI, CI Health (`docs/ci.md`)
 
 ## Not yet integrated
 
