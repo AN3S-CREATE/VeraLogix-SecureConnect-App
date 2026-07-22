@@ -54,7 +54,26 @@ Recommended required checks (names as shown in the GitHub UI):
 
 - `CI health summary` (from **CI Health**)
 - `Frontend typecheck` (from **Typecheck**)
-- `Backend unit + coverage` (from **Backend CI**) when backend paths change
+- `Backend unit + coverage` (from **Backend CI**)
+
+### How to configure (repository admin)
+
+1. Open **Settings → Rules → Rulesets** (or **Settings → Branches → Branch protection rules**).
+2. Create or edit a rule targeting `main`.
+3. Enable **Require status checks to pass**.
+4. Search for and select the three job names above.
+5. Optionally enable **Require branches to be up to date before merging** and restrict who can push to `main`.
+
+> Note: path-filtered Backend CI may show as pending/skipped on PRs that only touch frontend docs. Prefer requiring **CI health summary** + **Frontend typecheck** always; require **Backend unit + coverage** if your GitHub plan supports conditional required checks, or keep Backend CI required and touch a backend file / use `workflow_dispatch` when needed.
+
+### Verify
+
+After a merge to `main`, confirm:
+
+```bash
+gh run list --branch main --limit 5
+gh api repos/OWNER/REPO/commits/main/check-runs --jq '.check_runs[] | {name, conclusion}'
+```
 
 ## Design notes
 
