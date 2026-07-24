@@ -58,5 +58,6 @@
 | `.github/workflows/ci-health.yml` | Aggregator / recommended required check | Active |
 | `docs/ci.md` | Local CI parity + troubleshooting | Active |
 | `docs/ci-failure-diagnosis.md` | 2026-07-21 failure diagnosis | Active |
+| `docs/COMPREHENSIVE_REPO_ANALYSIS.md` | Full audit + super-app roadmap (2026-07-24) | Active |
 | `docs/migration-firebase.md` | Migration guide | Active |
 | `docs/blueprint.md` | Product/style blueprint | Active |

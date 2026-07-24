@@ -90,7 +90,8 @@ npm run typecheck
 npm test --workspace=@veralogix/secureconnect-api
 ```
 
-Full local parity, troubleshooting, and branch-protection check names: [`docs/ci.md`](docs/ci.md).
+Full local parity, troubleshooting, and branch-protection check names: [`docs/ci.md`](docs/ci.md).  
+Full architecture/product audit (2026-07-24): [`docs/COMPREHENSIVE_REPO_ANALYSIS.md`](docs/COMPREHENSIVE_REPO_ANALYSIS.md).
 
 ---
 

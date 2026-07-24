@@ -44,4 +44,5 @@ Postgres Keycloak  MinIO     Redis     BullMQ worker
 ## Not yet integrated
 
 - Genkit AI (`src/ai/genkit.ts`) — no flows in `src/ai/dev.ts`
-- ~32 portal pages use in-component mock arrays instead of SDK
+- Most portal pages still mock; live: `/cmd/access`, `/cmd/incidents`, `/ten/keys`, `/ten/passes`
+- See `docs/COMPREHENSIVE_REPO_ANALYSIS.md` (2026-07-24)
