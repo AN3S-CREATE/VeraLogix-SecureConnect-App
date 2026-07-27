@@ -94,20 +94,22 @@ export type Incident = {
 };
 
 export type Energy = {
+    id: string;
     siteId: string;
     ts: string;
-    kwh: number;
-    waterL: number;
+    kwh: number | string;
+    waterL: number | string;
     iaqIndex: number;
     zone: string;
 };
 
 export type EVSession = {
     id: string;
+    siteId?: string;
     bayId: string;
     userId: string;
-    kwh: number;
-    cost: number;
+    kwh: number | string;
+    cost: number | string;
     status: 'charging' | 'completed';
     startedAt: string;
     endedAt?: string;

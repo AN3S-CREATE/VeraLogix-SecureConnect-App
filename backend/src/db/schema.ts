@@ -360,6 +360,14 @@ DO $$ BEGIN
     CREATE TRIGGER bookings_notify AFTER INSERT OR UPDATE OR DELETE ON bookings
       FOR EACH ROW EXECUTE FUNCTION notify_table_change();
   END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'energy_readings_notify') THEN
+    CREATE TRIGGER energy_readings_notify AFTER INSERT OR UPDATE OR DELETE ON energy_readings
+      FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'ev_sessions_notify') THEN
+    CREATE TRIGGER ev_sessions_notify AFTER INSERT OR UPDATE OR DELETE ON ev_sessions
+      FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+  END IF;
 END $$;
 `;
 

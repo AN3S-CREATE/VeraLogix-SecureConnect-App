@@ -18,6 +18,8 @@ import {
   invoices,
   tenants,
   tenantSubscriptions,
+  energyReadings,
+  evSessions,
 } from './schema.js';
 import { eq } from 'drizzle-orm';
 
@@ -217,6 +219,68 @@ async function seed() {
         status: "unpaid",
         ledger: ["ElectriX", "WO-003"],
       });
+    }
+
+    const existingEnergy = await db.select().from(energyReadings).where(eq(energyReadings.siteId, site.id)).limit(1);
+    if (!existingEnergy.length) {
+      const now = Date.now();
+      await db.insert(energyReadings).values([
+        {
+          siteId: site.id,
+          ts: new Date(now - 3 * 3600_000),
+          kwh: "42.5",
+          waterL: "120.0",
+          iaqIndex: 82,
+          zone: "Lobby",
+        },
+        {
+          siteId: site.id,
+          ts: new Date(now - 2 * 3600_000),
+          kwh: "55.1",
+          waterL: "98.2",
+          iaqIndex: 76,
+          zone: "Tower A",
+        },
+        {
+          siteId: site.id,
+          ts: new Date(now - 1 * 3600_000),
+          kwh: "61.0",
+          waterL: "140.5",
+          iaqIndex: 71,
+          zone: "Parking",
+        },
+        {
+          siteId: site.id,
+          ts: new Date(now),
+          kwh: "48.2",
+          waterL: "110.0",
+          iaqIndex: 88,
+          zone: "Clubhouse",
+        },
+      ]);
+    }
+
+    const existingEv = await db.select().from(evSessions).where(eq(evSessions.siteId, site.id)).limit(1);
+    if (!existingEv.length) {
+      await db.insert(evSessions).values([
+        {
+          siteId: site.id,
+          bayId: "Bay-1",
+          userId: admin.id,
+          kwh: "12.5",
+          cost: "4.38",
+          status: "charging",
+        },
+        {
+          siteId: site.id,
+          bayId: "Bay-2",
+          userId: admin.id,
+          kwh: "28.1",
+          cost: "9.80",
+          status: "completed",
+          endedAt: new Date(),
+        },
+      ]);
     }
 
     log.info('Seed complete');

@@ -19,6 +19,7 @@ export default defineConfig({
         'src/lib/ai-copilot.ts',
         'src/lib/evidence.ts',
         'src/lib/sla.ts',
+        'src/lib/popia-export.ts',
         'src/observability/metrics.ts',
       ],
       thresholds: {

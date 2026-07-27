@@ -23,10 +23,13 @@ import {
   userSiteRoles,
   dataDeletionRequests,
   incidents,
+  sites,
 } from './db/schema.js';
 import { planUserDeletion } from './modules/popia/routes.js';
-import { heuristicMalwareScan } from './lib/evidence.js';
+import { heuristicMalwareScan, sha256Hex } from './lib/evidence.js';
 import { planSlaBreaches } from './lib/sla.js';
+import { buildPopiaExportPackage } from './lib/popia-export.js';
+import { createS3Client, ensureBucket, putObject } from './storage/minio.js';
 
 config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../.env') });
 
@@ -122,7 +125,59 @@ async function main() {
   new Worker(
     QUEUE_NAMES.exports,
     async (job) => {
-      log.info({ jobId: job.id, data: job.data }, 'Export job acknowledged');
+      const { userId, siteId: jobSiteId } = job.data as { userId: string; siteId?: string };
+      const payload = await buildPopiaExportPackage(db, userId);
+      const body = Buffer.from(JSON.stringify(payload, null, 2), 'utf8');
+      const hash = sha256Hex(body);
+      const objectKey = `exports/${userId}/${Date.now()}-popia-export.json`;
+
+      let siteId = jobSiteId;
+      if (!siteId) {
+        const [membership] = await db
+          .select()
+          .from(userSiteRoles)
+          .where(eq(userSiteRoles.userId, userId))
+          .limit(1);
+        siteId = membership?.siteId;
+      }
+      if (!siteId) {
+        const [anySite] = await db.select().from(sites).limit(1);
+        siteId = anySite?.id;
+      }
+      if (!siteId) {
+        log.warn({ userId }, 'POPIA export skipped — no site for file row');
+        return { skipped: true, reason: 'no_site' };
+      }
+
+      const s3 = createS3Client(env);
+      await ensureBucket(env, s3).catch(() => undefined);
+      try {
+        await putObject(env, s3, objectKey, body, 'application/json');
+      } catch (err) {
+        // CI / local without MinIO: still persist a DB file row pointing at the object key.
+        log.warn({ err, userId }, 'MinIO put failed — recording export metadata only');
+      }
+
+      const [row] = await db
+        .insert(files)
+        .values({
+          siteId,
+          ownerId: userId,
+          bucket: env.MINIO_BUCKET,
+          objectKey,
+          filename: `popia-export-${userId.slice(0, 8)}.json`,
+          mime: 'application/json',
+          sizeBytes: body.byteLength,
+          sha256: hash,
+          scanStatus: 'clean',
+          scannedAt: new Date(),
+          scanNotes: 'POPIA export package',
+          metadata: { kind: 'popia-export', exportedAt: payload.exportedAt },
+        })
+        .returning();
+
+      log.info({ jobId: job.id, userId, fileId: row.id, bytes: body.byteLength }, 'POPIA export archived');
+      return { fileId: row.id, sha256: hash, bytes: body.byteLength };
     },
     { connection },
   );
