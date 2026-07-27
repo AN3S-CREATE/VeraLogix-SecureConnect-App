@@ -32,9 +32,13 @@ Branch `main-phase3-super-features-2176` stacked on Phase 2.
 
 ## Next Immediate Steps
 
-1. Verify Phase 3 CI green on PR
-2. Merge Phase 1–3 stack in order
-3. Later: Stripe billing, full malware sandbox, App Store builds
+1. Merge Phase 1–3 stack (#4 → #5 → #6) onto `main`
+2. Maintainer: rotate Gemini API key; enable branch protection
+3. Continue wiring remaining mock portals; replace export stub; billing provider
+
+## Module status (headline)
+
+See [`docs/MODULE_STATUS.md`](docs/MODULE_STATUS.md) — refreshed 2026-07-27 after Phases 1–3.
 
 ## Patterns & Recurring Issues Noticed
 
