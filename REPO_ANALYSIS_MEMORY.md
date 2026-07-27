@@ -2,8 +2,8 @@
 
 ## Current Analysis Phase & Progress
 
-**Phase 2: E2E/CI, BFF auth, transactional POPIA, observability — ~95% implemented.**  
-Branch `main-phase2-e2e-bff-popia-obs-2176` stacked on Phase 1 tip.
+**Phase 2: E2E/CI, BFF auth, transactional POPIA, observability — complete (CI green).**  
+Branch `main-phase2-e2e-bff-popia-obs-2176` / PR #5. Stacked on Phase 1.
 
 ## Key Architectural Insights Discovered
 
