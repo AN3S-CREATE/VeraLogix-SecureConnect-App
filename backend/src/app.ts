@@ -22,6 +22,8 @@ import domainRoutes from './modules/domain/routes.js';
 import filesRoutes from './modules/files/routes.js';
 import adminRoutes from './modules/admin/routes.js';
 import popiaRoutes from './modules/popia/routes.js';
+import aiRoutes from './modules/ai/routes.js';
+import tenantsRoutes from './modules/tenants/routes.js';
 import realtimePlugin from './realtime/gateway.js';
 import { recordHttpRequest } from './observability/metrics.js';
 
@@ -77,6 +79,8 @@ export async function buildApp() {
   await app.register(filesRoutes, { env, db });
   await app.register(adminRoutes, { env, db });
   await app.register(popiaRoutes, { env, db });
+  await app.register(aiRoutes, { env, db });
+  await app.register(tenantsRoutes, { env, db });
   await app.register(realtimePlugin, { env, pool });
 
   app.setErrorHandler((err, req, reply) => {

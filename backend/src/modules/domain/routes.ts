@@ -20,8 +20,16 @@ const domainRoutes: FastifyPluginAsync<DomainOpts> = async (app, opts) => {
     tag: 'sites',
     table: sites as never,
     db,
-    createSchema: z.object({ name: NonEmptyString, slug: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/) }),
-    updateSchema: z.object({ name: NonEmptyString.optional(), slug: z.string().min(1).max(100).optional() }),
+    createSchema: z.object({
+      name: NonEmptyString,
+      slug: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/),
+      tenantId: UuidSchema.optional(),
+    }),
+    updateSchema: z.object({
+      name: NonEmptyString.optional(),
+      slug: z.string().min(1).max(100).optional(),
+      tenantId: UuidSchema.nullable().optional(),
+    }),
     writeRoles: ['admin', 'estate_manager'],
     readRoles: ['resident', 'agent', 'trustee', 'vendor', 'estate_manager', 'admin'],
   });

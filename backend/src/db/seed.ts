@@ -16,6 +16,8 @@ import {
   incidents,
   tickets,
   invoices,
+  tenants,
+  tenantSubscriptions,
 } from './schema.js';
 import { eq } from 'drizzle-orm';
 
@@ -27,13 +29,42 @@ async function seed() {
   const { db, pool } = createDb(env);
 
   try {
+    let [tenant] = await db.select().from(tenants).where(eq(tenants.slug, 'veralogix-demo')).limit(1);
+    if (!tenant) {
+      [tenant] = await db
+        .insert(tenants)
+        .values({
+          name: 'VeraLogix Demo Tenant',
+          slug: 'veralogix-demo',
+          billingEmail: 'billing@veralogix.com',
+          planCode: 'growth',
+        })
+        .returning();
+      const renews = new Date();
+      renews.setDate(renews.getDate() + 30);
+      await db.insert(tenantSubscriptions).values({
+        tenantId: tenant.id,
+        planCode: 'growth',
+        status: 'active',
+        seats: 25,
+        renewsAt: renews,
+      });
+      log.info({ tenantId: tenant.id }, 'Created demo tenant');
+    }
+
     let [site] = await db.select().from(sites).where(eq(sites.slug, 'demo-estate')).limit(1);
     if (!site) {
       [site] = await db
         .insert(sites)
-        .values({ name: 'Demo Estate', slug: 'demo-estate' })
+        .values({ name: 'Demo Estate', slug: 'demo-estate', tenantId: tenant.id })
         .returning();
       log.info({ siteId: site.id }, 'Created demo site');
+    } else if (!site.tenantId) {
+      [site] = await db
+        .update(sites)
+        .set({ tenantId: tenant.id, updatedAt: new Date() })
+        .where(eq(sites.id, site.id))
+        .returning();
     }
 
     let [unit] = await db.select().from(units).where(eq(units.siteId, site.id)).limit(1);

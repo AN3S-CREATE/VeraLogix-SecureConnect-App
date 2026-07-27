@@ -16,6 +16,9 @@ export default defineConfig({
         'src/lib/pagination.ts',
         'src/lib/roles.ts',
         'src/lib/utils.ts',
+        'src/lib/ai-copilot.ts',
+        'src/lib/evidence.ts',
+        'src/lib/sla.ts',
         'src/observability/metrics.ts',
       ],
       thresholds: {

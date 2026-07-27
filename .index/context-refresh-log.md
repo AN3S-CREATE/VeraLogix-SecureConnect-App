@@ -8,3 +8,4 @@
 
 | 2026-07-27 | Phase 1 MVP stabilize | Untracked `.env`; Frontend Build workflow; wired tickets/invoices/amenities; branch-protection checklist. |
 | 2026-07-27 | Phase 2 E2E/BFF/POPIA/obs | Integration CI workflow; BFF auth cookies; transactional POPIA; metrics + Redis realtime fanout. |
+| 2026-07-27 | Phase 3 super features | AI copilots, evidence locker, SLA worker, tenants, optional Expo mobile scaffold. |

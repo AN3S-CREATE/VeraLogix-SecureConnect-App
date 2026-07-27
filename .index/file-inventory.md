@@ -40,6 +40,13 @@
 | `backend/src/modules/domain/routes.ts` | All domain CRUD + unlock | Active |
 | `backend/src/modules/auth/routes.ts` | Keycloak auth routes | Active |
 | `backend/src/modules/popia/routes.ts` | POPIA export/deletion | Active |
+| `backend/src/modules/ai/routes.ts` | Incident summary + maintenance triage copilots | Active |
+| `backend/src/modules/tenants/routes.ts` | Multi-tenant admin CRUD | Active |
+| `backend/src/lib/ai-copilot.ts` | POPIA redaction + heuristic copilots | Active |
+| `backend/src/lib/evidence.ts` | Hash + heuristic malware scan helpers | Active |
+| `backend/src/lib/sla.ts` | SLA breach planner | Active |
+| `backend/src/db/migrations/0002_phase3.sql` | Evidence + tenants schema | Active |
+| `apps/mobile/**` | Optional Expo resident scaffold | Experimental |
 | `backend/src/worker.ts` | BullMQ workers (transactional POPIA deletion) | Active |
 | `backend/src/realtime/gateway.ts` | WS + Redis realtime fanout | Active |
 | `backend/src/observability/metrics.ts` | In-process Prometheus metrics | Active |

@@ -43,3 +43,15 @@
 **Date:** 2026-07-27  
 **Decision:** BullMQ deletion worker wraps all anonymize/soft-delete steps in a single Drizzle `db.transaction`.  
 **Rationale:** Avoids partial POPIA deletion state; failures roll back and can retry.
+
+## ADR-010: Phase 3 copilots with POPIA-safe heuristic fallback
+
+**Date:** 2026-07-27  
+**Decision:** Backend `/api/v1/ai/*` always runs deterministic redaction + heuristics; Gemini is optional when `GEMINI_API_KEY` is set. Genkit flows mirror this for local `genkit:dev`.  
+**Rationale:** CI and evals stay hermetic; no secret required for baseline copilots.
+
+## ADR-011: Multi-tenant SaaS foundation
+
+**Date:** 2026-07-27  
+**Decision:** Introduce `tenants` + `tenant_subscriptions` and optional `sites.tenant_id` without breaking existing single-estate demos.  
+**Rationale:** Enables billing/tenancy without forcing a big-bang migration of all portals.

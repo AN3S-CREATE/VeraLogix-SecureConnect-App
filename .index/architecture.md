@@ -48,5 +48,8 @@ Postgres `NOTIFY` → Redis `secureconnect:realtime` → per-instance WebSocket 
 
 ## Not yet integrated
 
-- Genkit AI (`src/ai/genkit.ts`) — no flows in `src/ai/dev.ts`
+- Full malware sandbox / watermark pipeline (heuristic scan only)
+- Production billing provider (Stripe/etc.)
+- Published App Store / Play builds (`apps/mobile` is optional scaffold)
 - Remaining portal pages still use in-component mock arrays instead of SDK
+- Genkit requires `GEMINI_API_KEY` for live model calls (heuristics work without)

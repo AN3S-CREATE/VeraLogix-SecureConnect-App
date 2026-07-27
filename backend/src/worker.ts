@@ -3,7 +3,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Worker } from 'bullmq';
 import nodemailer from 'nodemailer';
-import { eq } from 'drizzle-orm';
+import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { loadEnv } from './config/env.js';
 import { createLogger } from './config/logger.js';
 import { createDb } from './db/client.js';
@@ -22,8 +22,11 @@ import {
   files,
   userSiteRoles,
   dataDeletionRequests,
+  incidents,
 } from './db/schema.js';
 import { planUserDeletion } from './modules/popia/routes.js';
+import { heuristicMalwareScan } from './lib/evidence.js';
+import { planSlaBreaches } from './lib/sla.js';
 
 config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../.env') });
 
@@ -127,7 +130,27 @@ async function main() {
   new Worker(
     QUEUE_NAMES.imageProcess,
     async (job) => {
-      log.info({ jobId: job.id, data: job.data }, 'Image process stub');
+      const { fileId } = job.data as { fileId: string };
+      const [row] = await db.select().from(files).where(eq(files.id, fileId)).limit(1);
+      if (!row || row.deletedAt) {
+        log.warn({ fileId }, 'image-process: file missing');
+        return;
+      }
+      const scan = heuristicMalwareScan({
+        filename: row.filename,
+        mime: row.mime,
+        sizeBytes: row.sizeBytes,
+      });
+      await db
+        .update(files)
+        .set({
+          scanStatus: scan.status,
+          scanNotes: scan.notes,
+          scannedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(files.id, fileId));
+      log.info({ fileId, status: scan.status }, 'Evidence scan complete');
     },
     { connection },
   );
@@ -135,7 +158,64 @@ async function main() {
   new Worker(
     QUEUE_NAMES.slaCheck,
     async (job) => {
-      log.info({ jobId: job.id, data: job.data }, 'SLA check stub');
+      const { siteId } = (job.data ?? {}) as { siteId?: string };
+      const openStatuses = ['open', 'assigned', 'in_progress', 'new', 'acknowledged'];
+      let ticketRows = await db
+        .select()
+        .from(tickets)
+        .where(and(isNull(tickets.deletedAt), inArray(tickets.status, openStatuses)));
+      let incidentRows = await db
+        .select()
+        .from(incidents)
+        .where(and(isNull(incidents.deletedAt), inArray(incidents.status, openStatuses)));
+      if (siteId) {
+        ticketRows = ticketRows.filter((t) => t.siteId === siteId);
+        incidentRows = incidentRows.filter((i) => i.siteId === siteId);
+      }
+
+      const plan = planSlaBreaches([
+        ...ticketRows.map((t) => ({
+          id: t.id,
+          siteId: t.siteId,
+          status: t.status,
+          slaDeadline: t.slaDeadline,
+          kind: 'ticket' as const,
+        })),
+        ...incidentRows.map((i) => ({
+          id: i.id,
+          siteId: i.siteId,
+          status: i.status,
+          slaDeadline: i.slaDeadline,
+          kind: 'incident' as const,
+        })),
+      ]);
+
+      for (const item of plan.breached) {
+        if (item.kind === 'ticket') {
+          const row = ticketRows.find((t) => t.id === item.id);
+          const timeline = [...(row?.timeline ?? []), `SLA breached at ${new Date().toISOString()}`];
+          await db
+            .update(tickets)
+            .set({
+              status: 'sla_breached',
+              sla: 0,
+              timeline,
+              updatedAt: new Date(),
+            })
+            .where(eq(tickets.id, item.id));
+        } else {
+          await db
+            .update(incidents)
+            .set({ status: 'sla_breached', updatedAt: new Date() })
+            .where(eq(incidents.id, item.id));
+        }
+      }
+
+      log.info(
+        { breached: plan.breached.length, skipped: plan.skipped.length, siteId },
+        'SLA check completed',
+      );
+      return { breached: plan.breached.length };
     },
     { connection },
   );

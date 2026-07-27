@@ -37,19 +37,54 @@ export const deletionStatusEnum = pgEnum('deletion_status', [
   'rejected',
 ]);
 
+export const scanStatusEnum = pgEnum('scan_status', ['pending', 'clean', 'quarantined', 'failed']);
+export const subscriptionStatusEnum = pgEnum('subscription_status', [
+  'trialing',
+  'active',
+  'past_due',
+  'canceled',
+]);
+
 const timestamps = {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
 };
 
+export const tenants = pgTable('tenants', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name', { length: 200 }).notNull(),
+  slug: varchar('slug', { length: 100 }).notNull(),
+  billingEmail: varchar('billing_email', { length: 320 }),
+  planCode: varchar('plan_code', { length: 50 }).notNull().default('starter'),
+  ...timestamps,
+}, (t) => [
+  uniqueIndex('tenants_slug_uidx').on(t.slug),
+]);
+
+export const tenantSubscriptions = pgTable('tenant_subscriptions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id),
+  planCode: varchar('plan_code', { length: 50 }).notNull(),
+  status: subscriptionStatusEnum('status').notNull().default('trialing'),
+  seats: integer('seats').notNull().default(5),
+  renewsAt: timestamp('renews_at', { withTimezone: true }),
+  metadata: jsonb('metadata').$type<Record<string, unknown>>().notNull().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('tenant_subscriptions_tenant_idx').on(t.tenantId),
+]);
+
 export const sites = pgTable('sites', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name', { length: 200 }).notNull(),
   slug: varchar('slug', { length: 100 }).notNull(),
+  tenantId: uuid('tenant_id').references(() => tenants.id),
   ...timestamps,
 }, (t) => [
   uniqueIndex('sites_slug_uidx').on(t.slug),
+  index('sites_tenant_idx').on(t.tenantId),
 ]);
 
 export const users = pgTable('users', {
@@ -246,6 +281,10 @@ export const files = pgTable('files', {
   mime: varchar('mime', { length: 150 }).notNull(),
   sizeBytes: bigint('size_bytes', { mode: 'number' }).notNull(),
   metadata: jsonb('metadata').$type<Record<string, unknown>>().default({}),
+  sha256: varchar('sha256', { length: 64 }),
+  scanStatus: scanStatusEnum('scan_status').notNull().default('pending'),
+  scannedAt: timestamp('scanned_at', { withTimezone: true }),
+  scanNotes: text('scan_notes'),
   ...timestamps,
 }, (t) => [
   index('files_site_idx').on(t.siteId),
