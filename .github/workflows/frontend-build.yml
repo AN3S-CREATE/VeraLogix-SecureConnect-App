@@ -1,0 +1,52 @@
+# Frontend production build
+# Ensures `next build` succeeds with NODE_ENV=production (non-standard NODE_ENV
+# historically broke /404 prerender). No secrets required.
+
+name: Frontend Build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: frontend-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Frontend production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NODE_ENV: production
+      # Public placeholders only — never inject real secrets in CI
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+      NEXT_PUBLIC_WS_URL: ws://localhost:3000
+      NEXT_PUBLIC_DEV_AUTH_BYPASS: 'false'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Production build
+        run: |
+          echo "::notice::Building Next.js with NODE_ENV=production"
+          npm run build
+          echo "## Frontend build" >> "$GITHUB_STEP_SUMMARY"
+          echo "Status: **passed**" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Node: $(node -v)" >> "$GITHUB_STEP_SUMMARY"

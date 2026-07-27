@@ -54,7 +54,11 @@ Recommended required checks (names as shown in the GitHub UI):
 
 - `CI health summary` (from **CI Health**)
 - `Frontend typecheck` (from **Typecheck**)
+- `Frontend production build` (from **Frontend Build**)
 - `Backend unit + coverage` (from **Backend CI**)
+
+Admin checklist: [`docs/branch-protection-checklist.md`](./branch-protection-checklist.md).
+Secrets hygiene: [`docs/secrets.md`](./secrets.md).
 
 ### How to configure (repository admin)
 
