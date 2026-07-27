@@ -56,7 +56,10 @@
 | `.github/workflows/backend-ci.yml` | Backend typecheck, unit tests, coverage | Active |
 | `.github/workflows/typecheck.yml` | Frontend + SDK typecheck | Active |
 | `.github/workflows/ci-health.yml` | Aggregator / recommended required check | Active |
+| `.github/workflows/frontend-build.yml` | Production `next build` gate | Active |
 | `docs/ci.md` | Local CI parity + troubleshooting | Active |
+| `docs/secrets.md` | Secret rotation + local env hygiene | Active |
+| `docs/branch-protection-checklist.md` | Admin steps for required checks | Active |
 | `docs/ci-failure-diagnosis.md` | 2026-07-21 failure diagnosis | Active |
 | `docs/migration-firebase.md` | Migration guide | Active |
 | `docs/blueprint.md` | Product/style blueprint | Active |
