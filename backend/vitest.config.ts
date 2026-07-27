@@ -16,6 +16,7 @@ export default defineConfig({
         'src/lib/pagination.ts',
         'src/lib/roles.ts',
         'src/lib/utils.ts',
+        'src/observability/metrics.ts',
       ],
       thresholds: {
         lines: 50,

@@ -67,43 +67,51 @@ async function main() {
       const plan = planUserDeletion(userId);
       log.info({ requestId, plan }, 'Processing POPIA deletion');
 
-      await db
-        .update(dataDeletionRequests)
-        .set({ status: 'processing' })
-        .where(eq(dataDeletionRequests.id, requestId));
+      try {
+        await db.transaction(async (tx) => {
+          await tx
+            .update(dataDeletionRequests)
+            .set({ status: 'processing' })
+            .where(eq(dataDeletionRequests.id, requestId));
 
-      await db
-        .update(accessLogs)
-        .set({ userId: null, name: 'anonymized', updatedAt: new Date() })
-        .where(eq(accessLogs.userId, userId));
+          await tx
+            .update(accessLogs)
+            .set({ userId: null, name: 'anonymized', updatedAt: new Date() })
+            .where(eq(accessLogs.userId, userId));
 
-      const now = new Date();
-      await db.update(bookings).set({ deletedAt: now, updatedAt: now }).where(eq(bookings.userId, userId));
-      await db.update(invoices).set({ deletedAt: now, updatedAt: now }).where(eq(invoices.userId, userId));
-      await db.update(tickets).set({ deletedAt: now, updatedAt: now }).where(eq(tickets.assignee, userId));
-      await db.update(evSessions).set({ deletedAt: now, updatedAt: now }).where(eq(evSessions.userId, userId));
-      await db.update(files).set({ deletedAt: now, updatedAt: now }).where(eq(files.ownerId, userId));
-      await db
-        .update(consents)
-        .set({ withdrawnAt: now })
-        .where(eq(consents.userId, userId));
-      await db.delete(userSiteRoles).where(eq(userSiteRoles.userId, userId));
-      await db
-        .update(users)
-        .set({
-          deletedAt: now,
-          updatedAt: now,
-          email: `deleted-${userId}@anonymized.local`,
-          name: 'Deleted User',
-        })
-        .where(eq(users.id, userId));
+          const now = new Date();
+          await tx.update(bookings).set({ deletedAt: now, updatedAt: now }).where(eq(bookings.userId, userId));
+          await tx.update(invoices).set({ deletedAt: now, updatedAt: now }).where(eq(invoices.userId, userId));
+          await tx.update(tickets).set({ deletedAt: now, updatedAt: now }).where(eq(tickets.assignee, userId));
+          await tx.update(evSessions).set({ deletedAt: now, updatedAt: now }).where(eq(evSessions.userId, userId));
+          await tx.update(files).set({ deletedAt: now, updatedAt: now }).where(eq(files.ownerId, userId));
+          await tx
+            .update(consents)
+            .set({ withdrawnAt: now })
+            .where(eq(consents.userId, userId));
+          await tx.delete(userSiteRoles).where(eq(userSiteRoles.userId, userId));
+          await tx
+            .update(users)
+            .set({
+              deletedAt: now,
+              updatedAt: now,
+              email: `deleted-${userId}@anonymized.local`,
+              name: 'Deleted User',
+            })
+            .where(eq(users.id, userId));
 
-      await db
-        .update(dataDeletionRequests)
-        .set({ status: 'completed', processedAt: now, notes: plan.steps.join(',') })
-        .where(eq(dataDeletionRequests.id, requestId));
+          await tx
+            .update(dataDeletionRequests)
+            .set({ status: 'completed', processedAt: now, notes: plan.steps.join(',') })
+            .where(eq(dataDeletionRequests.id, requestId));
+        });
 
-      log.info({ requestId, userId }, 'POPIA deletion completed');
+        log.info({ requestId, userId }, 'POPIA deletion completed');
+      } catch (err) {
+        // Transaction rolls back partial anonymization; BullMQ can retry.
+        log.error({ err, requestId, userId }, 'POPIA deletion failed — transaction rolled back');
+        throw err;
+      }
     },
     { connection },
   );

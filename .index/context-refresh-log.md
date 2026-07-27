@@ -7,3 +7,4 @@
 | 2026-07-22 | Post-merge CI wrap-up | Confirmed `main` tip green after PR #1; expanded branch-protection docs; refreshed success report. |
 
 | 2026-07-27 | Phase 1 MVP stabilize | Untracked `.env`; Frontend Build workflow; wired tickets/invoices/amenities; branch-protection checklist. |
+| 2026-07-27 | Phase 2 E2E/BFF/POPIA/obs | Integration CI workflow; BFF auth cookies; transactional POPIA; metrics + Redis realtime fanout. |

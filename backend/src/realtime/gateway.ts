@@ -1,7 +1,13 @@
 import type { FastifyPluginAsync } from 'fastify';
 import type pg from 'pg';
+import { Redis } from 'ioredis';
 import type { Env } from '../config/env.js';
 import { createLogger } from '../config/logger.js';
+import {
+  recordRealtimeFanout,
+  recordWsMessage,
+  setWsClients,
+} from '../observability/metrics.js';
 
 export type RealtimeChange = {
   op: string;
@@ -22,11 +28,62 @@ type ClientMeta = {
   userId?: string;
 };
 
+const REDIS_CHANNEL = 'secureconnect:realtime';
+
 const realtimePlugin: FastifyPluginAsync<RealtimeOpts> = async (app, opts) => {
   const log = createLogger(opts.env);
   const clients = new Map<object, ClientMeta>();
 
-  // Dedicated LISTEN connection
+  const publisher = new Redis(opts.env.REDIS_URL, {
+    maxRetriesPerRequest: null,
+    enableReadyCheck: true,
+    lazyConnect: true,
+  });
+  const subscriber = new Redis(opts.env.REDIS_URL, {
+    maxRetriesPerRequest: null,
+    enableReadyCheck: true,
+    lazyConnect: true,
+  });
+
+  const fanoutLocal = (change: RealtimeChange) => {
+    const channel = `site:${change.siteId}:${change.table}`;
+    let delivered = 0;
+    for (const [socket, meta] of clients.entries()) {
+      if (!meta.siteIds.has(change.siteId)) continue;
+      if (meta.tables.size && !meta.tables.has(change.table)) continue;
+      try {
+        (socket as { send: (data: string) => void }).send(
+          JSON.stringify({ type: 'change', channel, data: change }),
+        );
+        delivered += 1;
+      } catch {
+        clients.delete(socket);
+      }
+    }
+    if (delivered) recordRealtimeFanout(delivered);
+    setWsClients(clients.size);
+  };
+
+  try {
+    await publisher.connect();
+    await subscriber.connect();
+    await subscriber.subscribe(REDIS_CHANNEL);
+    subscriber.on('message', (channel, payload) => {
+      if (channel !== REDIS_CHANNEL || !payload) return;
+      let change: RealtimeChange;
+      try {
+        change = JSON.parse(payload) as RealtimeChange;
+      } catch {
+        return;
+      }
+      fanoutLocal(change);
+    });
+    log.info({ channel: REDIS_CHANNEL }, 'Realtime Redis fanout subscribed');
+  } catch (err) {
+    log.warn({ err }, 'Realtime Redis fanout unavailable — falling back to local-only');
+  }
+
+  // Dedicated LISTEN connection — publish to Redis so multi-instance APIs share events
   const listener = await opts.pool.connect();
   await listener.query('LISTEN secureconnect_changes');
   listener.on('notification', (msg) => {
@@ -37,18 +94,12 @@ const realtimePlugin: FastifyPluginAsync<RealtimeOpts> = async (app, opts) => {
     } catch {
       return;
     }
-    const channel = `site:${change.siteId}:${change.table}`;
-    for (const [socket, meta] of clients.entries()) {
-      if (!meta.siteIds.has(change.siteId)) continue;
-      if (meta.tables.size && !meta.tables.has(change.table)) continue;
-      try {
-        (socket as { send: (data: string) => void }).send(
-          JSON.stringify({ type: 'change', channel, data: change }),
-        );
-      } catch {
-        clients.delete(socket);
-      }
-    }
+    void publisher
+      .publish(REDIS_CHANNEL, msg.payload)
+      .catch((err) => {
+        log.warn({ err }, 'Redis publish failed; delivering locally');
+        fanoutLocal(change);
+      });
   });
 
   app.addHook('onClose', async () => {
@@ -58,15 +109,24 @@ const realtimePlugin: FastifyPluginAsync<RealtimeOpts> = async (app, opts) => {
     } catch {
       /* ignore */
     }
+    try {
+      await subscriber.unsubscribe(REDIS_CHANNEL);
+      await subscriber.quit();
+      await publisher.quit();
+    } catch {
+      /* ignore */
+    }
   });
 
   app.get('/ws', { websocket: true }, (socket, req) => {
     const meta: ClientMeta = { siteIds: new Set(), tables: new Set() };
     clients.set(socket, meta);
+    setWsClients(clients.size);
 
     socket.send(JSON.stringify({ type: 'hello', correlationId: req.correlationId }));
 
     socket.on('message', async (raw) => {
+      recordWsMessage();
       try {
         const msg = JSON.parse(String(raw)) as {
           type: string;
@@ -119,6 +179,7 @@ const realtimePlugin: FastifyPluginAsync<RealtimeOpts> = async (app, opts) => {
 
     socket.on('close', () => {
       clients.delete(socket);
+      setWsClients(clients.size);
     });
   });
 };

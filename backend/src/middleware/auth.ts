@@ -127,8 +127,18 @@ const authPlugin: FastifyPluginAsync<AuthPluginOpts> = async (app, opts) => {
   app.decorate('authenticate', async (req: FastifyRequest) => {
     const header = req.headers.authorization;
     if (header?.startsWith('Bearer ')) {
+      const token = header.slice(7);
+      // Dev-session returns a sentinel token; must not hit JWKS verification.
+      if (token === 'dev-bypass') {
+        const bypass = await resolveDevBypass();
+        if (bypass && req.headers['x-dev-bypass'] === '1') {
+          req.authUser = bypass;
+          return;
+        }
+        throw new UnauthorizedError('Dev bypass not enabled');
+      }
       try {
-        req.authUser = await resolveUserFromToken(header.slice(7));
+        req.authUser = await resolveUserFromToken(token);
         return;
       } catch {
         throw new UnauthorizedError('Invalid or expired token');

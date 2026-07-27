@@ -23,9 +23,11 @@
 | `src/app/cmd/access/page.tsx` | Live doors + access logs | Active |
 | `src/app/ten/keys/page.tsx` | Live keys + access history | Active |
 | `src/app/**/page.tsx` (other) | Portal UI — mostly mock data | Active (partial) |
-| `src/backend/provider.tsx` | Auth session + SDK client | Active |
+| `src/backend/provider.tsx` | Auth session + SDK client (BFF cookies, in-memory token) | Active |
 | `src/backend/hooks.ts` | `useCollection`, `useDoc` | Active |
 | `src/middleware.ts` | Soft portal RBAC via cookie | Active |
+| `src/lib/auth-cookies.ts` | httpOnly session cookie helpers for BFF | Active |
+| `src/app/api/auth/*/route.ts` | BFF login / dev-session / logout / session | Active |
 | `src/ai/genkit.ts` | Genkit + Gemini model init | Experimental |
 | `src/ai/dev.ts` | Genkit dev entry (empty) | Experimental |
 | `src/components/prototype-seeder.tsx` | Client fallback door seed | Active |
@@ -38,7 +40,9 @@
 | `backend/src/modules/domain/routes.ts` | All domain CRUD + unlock | Active |
 | `backend/src/modules/auth/routes.ts` | Keycloak auth routes | Active |
 | `backend/src/modules/popia/routes.ts` | POPIA export/deletion | Active |
-| `backend/src/worker.ts` | BullMQ workers | Active |
+| `backend/src/worker.ts` | BullMQ workers (transactional POPIA deletion) | Active |
+| `backend/src/realtime/gateway.ts` | WS + Redis realtime fanout | Active |
+| `backend/src/observability/metrics.ts` | In-process Prometheus metrics | Active |
 | `backend/src/db/migrations/0001_init.sql` | Core schema | Active |
 | `backend/src/db/seed.ts` | Demo data seed | Active |
 | `backend/tests/**` | vitest unit/integration/e2e | Active |
@@ -54,10 +58,12 @@
 | Path | Purpose | Status |
 |------|---------|--------|
 | `.github/workflows/backend-ci.yml` | Backend typecheck, unit tests, coverage | Active |
+| `.github/workflows/backend-integration.yml` | Postgres+Redis integration/e2e | Active |
 | `.github/workflows/typecheck.yml` | Frontend + SDK typecheck | Active |
 | `.github/workflows/ci-health.yml` | Aggregator / recommended required check | Active |
 | `.github/workflows/frontend-build.yml` | Production `next build` gate | Active |
 | `docs/ci.md` | Local CI parity + troubleshooting | Active |
+| `docs/phase2/README.md` | Phase 2 delivery notes | Active |
 | `docs/secrets.md` | Secret rotation + local env hygiene | Active |
 | `docs/branch-protection-checklist.md` | Admin steps for required checks | Active |
 | `docs/ci-failure-diagnosis.md` | 2026-07-21 failure diagnosis | Active |

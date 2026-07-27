@@ -12,8 +12,9 @@ Enable **Settings → Rules → Rulesets** (or **Branches → Branch protection*
 | `Frontend typecheck` | Typecheck | **Yes** |
 | `Frontend production build` | Frontend Build | **Yes** |
 | `Backend unit + coverage` | Backend CI | Yes when possible* |
+| `Backend integration + e2e` | Backend Integration | Recommended once green* |
 
-\*Backend CI is path-filtered. Prefer always requiring CI Health + Typecheck + Frontend Build. Add Backend CI if your plan supports conditional required checks, or accept that docs-only PRs may need a no-op backend path touch.
+\*Backend CI / Integration are path-filtered. Prefer always requiring CI Health + Typecheck + Frontend Build. Add backend jobs if your plan supports conditional required checks, or accept that docs-only PRs may need a no-op backend path touch.
 
 ## Recommended rule options
 

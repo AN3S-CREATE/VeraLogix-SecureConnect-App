@@ -23,6 +23,7 @@ import filesRoutes from './modules/files/routes.js';
 import adminRoutes from './modules/admin/routes.js';
 import popiaRoutes from './modules/popia/routes.js';
 import realtimePlugin from './realtime/gateway.js';
+import { recordHttpRequest } from './observability/metrics.js';
 
 export async function buildApp() {
   const env = loadEnv();
@@ -114,6 +115,7 @@ export async function buildApp() {
   });
 
   app.addHook('onResponse', async (req, reply) => {
+    recordHttpRequest(reply.statusCode, reply.elapsedTime);
     logger.info({
       correlationId: req.correlationId,
       method: req.method,

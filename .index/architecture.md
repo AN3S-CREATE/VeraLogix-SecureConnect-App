@@ -24,24 +24,29 @@ Postgres Keycloak  MinIO     Redis     BullMQ worker
 
 ## Auth flow
 
-1. User logs in via SDK → `POST /api/v1/auth/login` → Keycloak token exchange
-2. JWT validated in `backend/src/middleware/auth.ts`; app user resolved from `users` + `user_site_roles`
-3. Frontend stores tokens in `localStorage`; sets `sc_role` cookie for soft portal routing
-4. Dev path: `DEV_AUTH_BYPASS` → `POST /api/v1/auth/dev-session`
+1. Browser calls Next BFF (`POST /api/auth/login` or `/api/auth/dev-session`) → Fastify `/api/v1/auth/*`
+2. BFF sets httpOnly `sc_access` / `sc_refresh` (+ soft `sc_role` for portal middleware)
+3. Provider hydrates in-memory SDK token via `GET /api/auth/session` (no localStorage tokens)
+4. JWT validated in `backend/src/middleware/auth.ts`; app user resolved from `users` + `user_site_roles`
+5. Dev path: `DEV_AUTH_BYPASS` → sentinel Bearer `dev-bypass` + `x-dev-bypass: 1`
 
 ## Data flow (wired pages)
 
 - `/cmd/access`, `/ten/keys`: `useCollection('doors'|'access-logs')` + WebSocket subscribe
 - Door unlock: `client.unlockDoor(id)` → API updates door + inserts access_log + audit
 
+## Realtime
+
+Postgres `NOTIFY` → Redis `secureconnect:realtime` → per-instance WebSocket fanout (`backend/src/realtime/gateway.ts`).
+
 ## Deployment
 
 - Local: `docker compose -f docker/docker-compose.yml up` + `npm run dev`
 - Edge: Caddy proxies API, Keycloak, MinIO
-- Observability: optional `--profile observability` for Prometheus/Grafana
-- CI: GitHub Actions — Typecheck, Backend CI, CI Health (`docs/ci.md`)
+- Observability: `/metrics` Prometheus text; optional Compose `--profile observability` for Prometheus/Grafana
+- CI: Typecheck, Frontend Build, Backend CI, Backend Integration (Postgres+Redis services), CI Health — see `docs/ci.md`
 
 ## Not yet integrated
 
 - Genkit AI (`src/ai/genkit.ts`) — no flows in `src/ai/dev.ts`
-- ~32 portal pages use in-component mock arrays instead of SDK
+- Remaining portal pages still use in-component mock arrays instead of SDK

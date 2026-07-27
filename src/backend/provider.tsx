@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -16,9 +17,10 @@ import {
   type Role,
 } from '@veralogix/secureconnect-sdk';
 
-const TOKEN_KEY = 'sc_access_token';
-const REFRESH_KEY = 'sc_refresh_token';
-const USER_KEY = 'sc_user';
+/** Legacy keys — cleared on boot so tokens are no longer persisted in localStorage. */
+const LEGACY_TOKEN_KEY = 'sc_access_token';
+const LEGACY_REFRESH_KEY = 'sc_refresh_token';
+const LEGACY_USER_KEY = 'sc_user';
 
 type BackendContextValue = {
   client: SecureConnectClient;
@@ -32,19 +34,19 @@ type BackendContextValue = {
 
 const BackendContext = createContext<BackendContextValue | null>(null);
 
-function readStoredUser(): SessionUser | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = localStorage.getItem(USER_KEY);
-    return raw ? (JSON.parse(raw) as SessionUser) : null;
-  } catch {
-    return null;
-  }
+function clearLegacyStorage() {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(LEGACY_TOKEN_KEY);
+  localStorage.removeItem(LEGACY_REFRESH_KEY);
+  localStorage.removeItem(LEGACY_USER_KEY);
 }
 
 export function BackendClientProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const tokenRef = useRef<string | null>(null);
+  const setUserRef = useRef(setUser);
+  setUserRef.current = setUser;
 
   const client = useMemo(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
@@ -52,77 +54,112 @@ export function BackendClientProvider({ children }: { children: ReactNode }) {
     return createClient({
       apiUrl,
       wsUrl,
-      getToken: () => (typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null),
+      getToken: () => tokenRef.current,
       onUnauthorized: () => {
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(REFRESH_KEY);
-        localStorage.removeItem(USER_KEY);
-        setUser(null);
+        tokenRef.current = null;
+        setUserRef.current(null);
+        void fetch('/api/auth/logout', { method: 'POST' }).catch(() => undefined);
       },
     });
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    const stored = readStoredUser();
-    if (token) {
-      client.setTokens(token, localStorage.getItem(REFRESH_KEY) ?? undefined);
-      setUser(stored);
-      client
-        .me()
-        .then((me) => {
-          const next = {
-            id: me.id,
-            email: me.email,
-            name: me.name,
-            roles: me.roles,
-            siteIds: me.siteIds,
-          };
-          localStorage.setItem(USER_KEY, JSON.stringify(next));
-          setUser(next);
-        })
-        .catch(() => {
-          /* keep stored user for offline UX */
-        })
-        .finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
-    }
+    clearLegacyStorage();
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/session', { credentials: 'same-origin' });
+        if (!res.ok) {
+          if (!cancelled) {
+            setUser(null);
+            tokenRef.current = null;
+          }
+          return;
+        }
+        const body = (await res.json()) as {
+          authenticated: boolean;
+          user: SessionUser | null;
+          accessToken: string | null;
+        };
+        if (cancelled) return;
+        if (body.authenticated && body.accessToken && body.user) {
+          tokenRef.current = body.accessToken;
+          client.setTokens(body.accessToken);
+          setUser(body.user);
+        } else {
+          setUser(null);
+          tokenRef.current = null;
+        }
+      } catch {
+        if (!cancelled) {
+          setUser(null);
+          tokenRef.current = null;
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [client]);
 
-  const persistSession = useCallback(
+  const applySession = useCallback(
     (accessToken: string, refreshToken: string | undefined, nextUser: SessionUser) => {
-      localStorage.setItem(TOKEN_KEY, accessToken);
-      if (refreshToken) localStorage.setItem(REFRESH_KEY, refreshToken);
-      localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
+      tokenRef.current = accessToken;
       client.setTokens(accessToken, refreshToken);
       setUser(nextUser);
-      document.cookie = `sc_role=${nextUser.roles[0] ?? 'resident'}; path=/; SameSite=Lax`;
     },
     [client],
   );
 
   const login = useCallback(
     async (email: string, password: string) => {
-      const session = await client.login(email, password);
-      persistSession(session.accessToken, session.refreshToken, session.user);
-      return session.user;
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ email, password }),
+      });
+      const body = (await res.json()) as {
+        user?: SessionUser;
+        accessToken?: string;
+        refreshToken?: string;
+        error?: { message?: string };
+      };
+      if (!res.ok || !body.user || !body.accessToken) {
+        throw new Error(body.error?.message ?? 'Login failed');
+      }
+      applySession(body.accessToken, body.refreshToken, body.user);
+      return body.user;
     },
-    [client, persistSession],
+    [applySession],
   );
 
   const loginDev = useCallback(async () => {
-    const session = await client.devSession();
-    persistSession(session.accessToken, session.refreshToken, session.user);
-    return session.user;
-  }, [client, persistSession]);
+    const res = await fetch('/api/auth/dev-session', {
+      method: 'POST',
+      credentials: 'same-origin',
+    });
+    const body = (await res.json()) as {
+      user?: SessionUser;
+      accessToken?: string;
+      refreshToken?: string;
+      error?: { message?: string };
+    };
+    if (!res.ok || !body.user || !body.accessToken) {
+      throw new Error(body.error?.message ?? 'Dev session unavailable');
+    }
+    applySession(body.accessToken, body.refreshToken, body.user);
+    return body.user;
+  }, [applySession]);
 
   const logout = useCallback(async () => {
-    await client.logout();
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(REFRESH_KEY);
-    localStorage.removeItem(USER_KEY);
-    document.cookie = 'sc_role=; path=/; Max-Age=0';
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }).catch(
+      () => undefined,
+    );
+    client.clearTokens();
+    tokenRef.current = null;
     setUser(null);
   }, [client]);
 

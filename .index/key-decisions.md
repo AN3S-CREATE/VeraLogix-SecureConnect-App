@@ -26,8 +26,20 @@
 **Decision:** Genkit dependencies present; no production flows yet.  
 **Rationale:** README marks AI as optional post-cutover work.
 
-## ADR-006: CI uses root workspace lockfile + scoped typecheck
+## ADR-007: BFF httpOnly session cookies (Phase 2)
 
-**Date:** 2026-07-21  
-**Decision:** All Actions jobs run `npm ci` at repo root; root `tsconfig` excludes `backend/`; Backend CI typechecks the API workspace separately; coverage thresholds apply only to unit-covered lib modules.  
-**Rationale:** Fixes broken `backend/package-lock.json` cache path, prevents NodeNext/bundler clash in one `tsc`, and keeps coverage gates honest for the unit suite.
+**Date:** 2026-07-27  
+**Decision:** Next.js route handlers under `/api/auth/*` set `sc_access` / `sc_refresh` httpOnly cookies; the React provider hydrates an in-memory SDK token from `GET /api/auth/session` and clears legacy localStorage keys.  
+**Rationale:** Reduces XSS token theft vs localStorage; keeps soft `sc_role` cookie for portal middleware demos; API still validates Bearer/JWT.
+
+## ADR-008: Redis fanout for realtime (Phase 2)
+
+**Date:** 2026-07-27  
+**Decision:** Postgres `NOTIFY` → Redis pub/sub channel `secureconnect:realtime` → local WebSocket fanout.  
+**Rationale:** Multi-instance API deployments share change events without sticky sessions.
+
+## ADR-009: Transactional POPIA deletion (Phase 2)
+
+**Date:** 2026-07-27  
+**Decision:** BullMQ deletion worker wraps all anonymize/soft-delete steps in a single Drizzle `db.transaction`.  
+**Rationale:** Avoids partial POPIA deletion state; failures roll back and can retry.

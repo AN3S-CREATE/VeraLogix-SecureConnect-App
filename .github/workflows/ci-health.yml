@@ -44,6 +44,7 @@ jobs:
           echo "::notice::Verifying workflow files and package scripts"
           test -f .github/workflows/typecheck.yml
           test -f .github/workflows/backend-ci.yml
+          test -f .github/workflows/backend-integration.yml
           test -f .github/workflows/ci-health.yml
           test -f .github/workflows/frontend-build.yml
           test -f package-lock.json

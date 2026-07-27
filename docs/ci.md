@@ -8,13 +8,35 @@ This repository uses GitHub Actions for hermetic Node.js checks across the npm w
 |---|---|---|---|
 | **CI Health** | `.github/workflows/ci-health.yml` | Aggregator / recommended required check; smoke typecheck + unit tests | None |
 | **Typecheck** | `.github/workflows/typecheck.yml` | Frontend + SDK `tsc --noEmit` | None |
+| **Frontend Build** | `.github/workflows/frontend-build.yml` | `next build` with `NODE_ENV=production` | None |
 | **Backend CI** | `.github/workflows/backend-ci.yml` | API typecheck, unit tests, coverage | None |
+| **Backend Integration** | `.github/workflows/backend-integration.yml` | Postgres + Redis services; migrate/seed; integration + e2e | None |
 
-Triggers: `push` / `pull_request` to `main` (and `master`), plus `workflow_dispatch`. Backend CI is also path-filtered to backend/SDK/lockfile changes.
+Triggers: `push` / `pull_request` to `main` (and `master`), plus `workflow_dispatch`. Backend CI / Integration are path-filtered to backend/SDK/lockfile changes.
 
-Integration and e2e Vitest suites are **not** run in CI by default (they need Docker / a live stack). Enable locally with `RUN_INTEGRATION=1` / `RUN_E2E=1`.
+## Integration / e2e (CI + local)
 
-## Run the same checks locally
+**CI** starts Postgres 16 + Redis 7 as Actions service containers, applies migrations, seeds demo data, boots the API with `DEV_AUTH_BYPASS=true`, then runs:
+
+```bash
+RUN_INTEGRATION=1 npm run test:integration --workspace=@veralogix/secureconnect-api
+RUN_E2E=1 npm run test:e2e --workspace=@veralogix/secureconnect-api
+```
+
+Keycloak and MinIO are **not** required for the smoke path (dummy env values satisfy Zod). `/health/ready` may report them as `down`; `/health/live` and the unlock flow still pass.
+
+**Locally** (with Compose or any live Postgres/Redis):
+
+```bash
+docker compose -f docker/docker-compose.yml up -d postgres redis
+# export env from backend/.env.example, set DEV_AUTH_BYPASS=true
+npm run db:migrate && npm run db:seed
+npm run dev:api
+RUN_INTEGRATION=1 npm run test:integration --workspace=@veralogix/secureconnect-api
+RUN_E2E=1 npm run test:e2e --workspace=@veralogix/secureconnect-api
+```
+
+## Run the same hermetic checks locally
 
 ```bash
 # Hermetic install (same as CI)
@@ -46,6 +68,7 @@ If you add deploy or cloud jobs later, document new `secrets.*` here and keep le
    - **SDK/frontend type errors**: fix under `packages/sdk` or `src/`; root `tsconfig.json` excludes `backend/`.
    - **Backend type errors**: run workspace typecheck; API uses `NodeNext` modules.
    - **Coverage**: thresholds apply only to unit-covered lib modules listed in `backend/vitest.config.ts`.
+   - **Integration**: check service container health, `/tmp/secureconnect-api.log` on the job, and that `DEV_AUTH_BYPASS=true` with `NODE_ENV=development`.
 4. Re-run: Actions → workflow run → **Re-run failed jobs**, or push an empty commit / use **Run workflow**.
 
 ## Branch protection
@@ -56,19 +79,21 @@ Recommended required checks (names as shown in the GitHub UI):
 - `Frontend typecheck` (from **Typecheck**)
 - `Frontend production build` (from **Frontend Build**)
 - `Backend unit + coverage` (from **Backend CI**)
+- `Backend integration + e2e` (from **Backend Integration**) — recommended once stable
 
 Admin checklist: [`docs/branch-protection-checklist.md`](./branch-protection-checklist.md).
 Secrets hygiene: [`docs/secrets.md`](./secrets.md).
+Phase 2 notes: [`docs/phase2/README.md`](./phase2/README.md).
 
 ### How to configure (repository admin)
 
 1. Open **Settings → Rules → Rulesets** (or **Settings → Branches → Branch protection rules**).
 2. Create or edit a rule targeting `main`.
 3. Enable **Require status checks to pass**.
-4. Search for and select the three job names above.
+4. Search for and select the job names above.
 5. Optionally enable **Require branches to be up to date before merging** and restrict who can push to `main`.
 
-> Note: path-filtered Backend CI may show as pending/skipped on PRs that only touch frontend docs. Prefer requiring **CI health summary** + **Frontend typecheck** always; require **Backend unit + coverage** if your GitHub plan supports conditional required checks, or keep Backend CI required and touch a backend file / use `workflow_dispatch` when needed.
+> Note: path-filtered Backend CI / Integration may show as pending/skipped on PRs that only touch frontend docs. Prefer requiring **CI health summary** + **Frontend typecheck** + **Frontend production build** always; require backend jobs when your GitHub plan supports conditional required checks.
 
 ### Verify
 
