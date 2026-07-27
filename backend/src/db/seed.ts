@@ -1,3 +1,6 @@
+import { config } from 'dotenv';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { loadEnv } from '../config/env.js';
 import { createLogger } from '../config/logger.js';
 import { createDb } from './client.js';
@@ -11,8 +14,12 @@ import {
   amenities,
   passes,
   incidents,
+  tickets,
+  invoices,
 } from './schema.js';
 import { eq } from 'drizzle-orm';
+
+config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../.env') });
 
 async function seed() {
   const env = loadEnv();
@@ -140,6 +147,45 @@ async function seed() {
           evidence: ['CCTV camera offline in parking garage P2.'],
         },
       ]);
+    }
+
+    const existingTickets = await db.select().from(tickets).where(eq(tickets.siteId, site.id)).limit(1);
+    if (!existingTickets.length) {
+      const sla = new Date(Date.now() + 48 * 60 * 60 * 1000);
+      await db.insert(tickets).values([
+        {
+          siteId: site.id,
+          unitId: unit.id,
+          category: "plumbing",
+          description: "Leaky Faucet in kitchen",
+          status: "open",
+          severity: "low",
+          slaDeadline: sla,
+          timeline: ["Seeded open ticket"],
+        },
+        {
+          siteId: site.id,
+          unitId: unit.id,
+          category: "hvac",
+          description: "AC Not Cooling",
+          status: "open",
+          severity: "high",
+          slaDeadline: sla,
+          timeline: ["Seeded open ticket"],
+        },
+      ]);
+    }
+
+    const existingInvoices = await db.select().from(invoices).where(eq(invoices.siteId, site.id)).limit(1);
+    if (!existingInvoices.length) {
+      await db.insert(invoices).values({
+        siteId: site.id,
+        userId: admin.id,
+        amount: "850.50",
+        due: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        status: "unpaid",
+        ledger: ["ElectriX", "WO-003"],
+      });
     }
 
     log.info('Seed complete');

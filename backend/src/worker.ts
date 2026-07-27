@@ -1,3 +1,6 @@
+import { config } from 'dotenv';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Worker } from 'bullmq';
 import nodemailer from 'nodemailer';
 import { eq } from 'drizzle-orm';
@@ -21,6 +24,8 @@ import {
   dataDeletionRequests,
 } from './db/schema.js';
 import { planUserDeletion } from './modules/popia/routes.js';
+
+config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../.env') });
 
 async function main() {
   const env = loadEnv();

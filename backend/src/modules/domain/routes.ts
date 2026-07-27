@@ -213,7 +213,7 @@ const domainRoutes: FastifyPluginAsync<DomainOpts> = async (app, opts) => {
       status: z.enum(['paid', 'unpaid']).optional(),
       ledger: z.array(z.string()).optional(),
     }),
-    writeRoles: ['trustee', 'estate_manager', 'admin'],
+    writeRoles: ['vendor', 'trustee', 'estate_manager', 'admin'],
   });
 
   registerCrudRoutes(app, {
