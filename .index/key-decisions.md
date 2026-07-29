@@ -55,3 +55,10 @@
 **Date:** 2026-07-27  
 **Decision:** Introduce `tenants` + `tenant_subscriptions` and optional `sites.tenant_id` without breaking existing single-estate demos.  
 **Rationale:** Enables billing/tenancy without forcing a big-bang migration of all portals.
+
+## ADR-012: Client-side KPI aggregation for trustee/reports (Phase 5)
+
+**Date:** 2026-07-29  
+**Decision:** Derive trustee and cmd report metrics in `src/lib/portal-kpis.ts` from existing collection endpoints instead of new aggregate APIs.  
+**Rationale:** Reuses CRUD surface; keeps Phase 5 focused on portal wiring; pack export is JSON until PDF/deck lands.
+

@@ -34,6 +34,9 @@ Postgres Keycloak  MinIO     Redis     BullMQ worker
 
 - `/cmd/access`, `/ten/keys`: `useCollection('doors'|'access-logs')` + WebSocket subscribe
 - Door unlock: `client.unlockDoor(id)` → API updates door + inserts access_log + audit
+- Trustee `/tru/{overview,financials,security,energy}`: collections → `src/lib/portal-kpis.ts`
+- `/cmd/reports`: same KPIs → `buildCmdReportPack` JSON export
+- `/ven/dashboard`: tickets + passes; access create with ticket fallback
 
 ## Realtime
 
@@ -51,5 +54,5 @@ Postgres `NOTIFY` → Redis `secureconnect:realtime` → per-instance WebSocket 
 - Full malware sandbox / watermark pipeline (heuristic scan only)
 - Production billing provider (Stripe/etc.)
 - Published App Store / Play builds (`apps/mobile` is optional scaffold)
-- Remaining portal pages still use in-component mock arrays instead of SDK
+- Remaining mock portals: cmd concierge/integrations/pricing; ten home/wallet/onboarding; tru audit/collections/pricing; ven onboarding/safety
 - Genkit requires `GEMINI_API_KEY` for live model calls (heuristics work without)
