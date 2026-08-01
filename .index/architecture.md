@@ -12,7 +12,7 @@ Multi-portal property security platform: Next.js frontend talks to a self-hosted
 │  Portals: /cmd /ten /tru /ven + /templates                  │
 │  src/backend: provider, hooks (useCollection, useDoc)       │
 └──────────────────────────┬──────────────────────────────────┘
-                           │ REST + WS
+                            │ REST + WS
 ┌──────────────────────────▼──────────────────────────────────┐
 │  Fastify API (port 3000) — backend/src/app.ts               │
 │  Modules: auth, domain CRUD, files, admin, popia, realtime  │
@@ -28,7 +28,7 @@ Postgres Keycloak  MinIO     Redis     BullMQ worker
 2. BFF sets httpOnly `sc_access` / `sc_refresh` (+ soft `sc_role` for portal middleware)
 3. Provider hydrates in-memory SDK token via `GET /api/auth/session` (no localStorage tokens)
 4. JWT validated in `backend/src/middleware/auth.ts`; app user resolved from `users` + `user_site_roles`
-5. Dev path: `DEV_AUTH_BYPASS` → sentinel Bearer `dev-bypass` + `x-dev-bypass: 1`
+5. Dev path: `DEV_AUTH_BYPASS` → sentinel `******` + `x-dev-bypass: 1`
 
 ## Data flow (wired pages)
 
@@ -51,8 +51,11 @@ Postgres `NOTIFY` → Redis `secureconnect:realtime` → per-instance WebSocket 
 
 ## Not yet integrated
 
+- Genkit AI (`src/ai/genkit.ts`) — no flows in `src/ai/dev.ts`
+- Most portal pages still mock; live pages now include `/cmd/access`, `/cmd/incidents`, `/ten/keys`, `/ten/passes`, trustee workspaces, and `/cmd/reports`
 - Full malware sandbox / watermark pipeline (heuristic scan only)
 - Production billing provider (Stripe/etc.)
 - Published App Store / Play builds (`apps/mobile` is optional scaffold)
 - Remaining mock portals: cmd concierge/integrations/pricing; ten home/wallet/onboarding; tru audit/collections/pricing; ven onboarding/safety
 - Genkit requires `GEMINI_API_KEY` for live model calls (heuristics work without)
+- See `docs/COMPREHENSIVE_REPO_ANALYSIS.md` and `docs/MODULE_STATUS.md`

@@ -9,7 +9,7 @@
 | `package.json` | Next.js app + workspace scripts | Active |
 | `PROJECT_MEMORY.md` | Agent project intelligence state | Active |
 | `.env.example` | Frontend public env template | Active |
-| `.env` | Local secrets (**must not commit**) | Active |
+| `.env` | Local secrets (**must not commit**; removed from tracking in Phase 1) | Active |
 | `README.md` | Product docs, quick start, roadmap | Active |
 | `docker/docker-compose.yml` | Full self-hosted stack | Active |
 | `firestore.rules` | Legacy Firebase rules | Dead |
@@ -36,7 +36,7 @@
 | `src/lib/auth-cookies.ts` | httpOnly session cookie helpers for BFF | Active |
 | `src/app/api/auth/*/route.ts` | BFF login / dev-session / logout / session | Active |
 | `src/ai/genkit.ts` | Genkit + Gemini model init | Experimental |
-| `src/ai/dev.ts` | Genkit dev entry (empty) | Experimental |
+| `src/ai/dev.ts` | Genkit dev entry registering copilot flows | Experimental |
 | `src/components/prototype-seeder.tsx` | Client fallback door seed | Active |
 
 ## Backend (`backend/`)
@@ -85,5 +85,6 @@
 | `docs/secrets.md` | Secret rotation + local env hygiene | Active |
 | `docs/branch-protection-checklist.md` | Admin steps for required checks | Active |
 | `docs/ci-failure-diagnosis.md` | 2026-07-21 failure diagnosis | Active |
+| `docs/COMPREHENSIVE_REPO_ANALYSIS.md` | Full audit + super-app roadmap (2026-07-24) | Active |
 | `docs/migration-firebase.md` | Migration guide | Active |
 | `docs/blueprint.md` | Product/style blueprint | Active |
