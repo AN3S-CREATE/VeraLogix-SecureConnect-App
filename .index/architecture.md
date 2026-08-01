@@ -51,11 +51,10 @@ Postgres `NOTIFY` → Redis `secureconnect:realtime` → per-instance WebSocket 
 
 ## Not yet integrated
 
-- Genkit AI (`src/ai/genkit.ts`) — no flows in `src/ai/dev.ts`
 - Most portal pages still mock; live pages now include `/cmd/access`, `/cmd/incidents`, `/ten/keys`, `/ten/passes`, trustee workspaces, and `/cmd/reports`
 - Full malware sandbox / watermark pipeline (heuristic scan only)
 - Production billing provider (Stripe/etc.)
 - Published App Store / Play builds (`apps/mobile` is optional scaffold)
 - Remaining mock portals: cmd concierge/integrations/pricing; ten home/wallet/onboarding; tru audit/collections/pricing; ven onboarding/safety
 - Genkit requires `GEMINI_API_KEY` for live model calls (heuristics work without)
-- See `docs/COMPREHENSIVE_REPO_ANALYSIS.md` and `docs/MODULE_STATUS.md`
+- See `docs/COMPREHENSIVE_REPO_ANALYSIS.md` for the dated 2026-07-24 baseline and `docs/MODULE_STATUS.md` for current status.

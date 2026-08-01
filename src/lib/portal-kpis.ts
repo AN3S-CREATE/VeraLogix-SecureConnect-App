@@ -133,7 +133,7 @@ export function useEvKpis(sessions: EVSession[] | null | undefined) {
 
 export function formatMoney(n: number) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
-  if (n >= 1_000) return `$${Math.round(n).toLocaleString()}`;
+  if (n >= 1_000) return `$${Math.round(n).toLocaleString('en-US')}`;
   return `$${n.toFixed(2)}`;
 }
 

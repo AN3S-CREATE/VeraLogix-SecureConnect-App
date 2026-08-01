@@ -10,7 +10,7 @@ Phase 5 merge baseline: the repository includes the analysis report plus the pha
 - Frontend live API wiring expanded from a small subset of pages to a broader portal matrix that now includes `/cmd/access`, `/cmd/incidents`, `/ten/keys`, `/ten/passes`, trustee overview/financials/security/energy, vendor dashboard, and `/cmd/reports`.
 - Frontend BFF auth now uses httpOnly cookies and a provider session endpoint, while backend JWT validation remains in place.
 - Realtime is implemented via Postgres `NOTIFY` → Redis → WebSocket fanout.
-- Genkit remains scaffolded but not yet an operational capability.
+- Genkit copilot flows are registered, with deterministic POPIA-safe heuristic fallbacks when live Gemini calls are unavailable.
 
 ## Files Deeply Reviewed
 
@@ -19,7 +19,6 @@ Phase 5 merge baseline: the repository includes the analysis report plus the pha
 
 ## Open Questions & Areas Needing Investigation
 
-- Root cause of the Next `<Html>` /404 build failure (dependency isolation) if it still reproduces after the merge
 - Whether the Gemini key remains in the repo history and should be rotated
 - Remaining production hardening work (billing provider, sandbox pipeline, mobile publishing)
 - Branch protection and deployment rollout for the merged phases
@@ -32,19 +31,20 @@ Phase 5 merge baseline: the repository includes the analysis report plus the pha
 
 ## Next Immediate Steps
 
-1. Validate the merged branch and any relevant tests/builds
-2. Resolve any post-merge issues from the latest `main` updates
-3. Continue hardening secrets, build, and deployment workflows
-4. Track remaining mock portal work and production integrations
+1. Rotate the previously exposed Gemini key.
+2. Configure branch protection and required CI checks.
+3. Continue hardening deployment workflows and production integrations.
+4. Track and complete remaining mock portal work.
 
 ## Patterns & Recurring Issues Noticed
 
 - Mock arrays still appear on polished UI while APIs already exist
 - Soft cookie RBAC and backend JWT enforcement are still a mix for demos
-- Genkit is scaffolded but not yet a production capability
+- Advanced capabilities remain partial integrations: heuristic scanning, JSON report packs, and an Expo mobile scaffold
 
 ## Session Log
 
 - 2026-07-24 — Comprehensive analysis + execution evidence
 - 2026-07-27/29 — Phase 1–5 feature work merged into `main`
 - 2026-08-01 — Merged latest `main` into this branch and resolved docs/index conflicts
+- 2026-08-01 — Validation passed: frontend/backend typechecks, 40 backend unit tests, and production Next.js build
