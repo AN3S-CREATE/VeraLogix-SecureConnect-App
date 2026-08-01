@@ -1,44 +1,15 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
-import { eq } from 'drizzle-orm';
 import type { Env } from '../../config/env.js';
 import type { Db } from '../../db/client.js';
-import {
-  users,
-  consents,
-  accessLogs,
-  bookings,
-  invoices,
-  tickets,
-  evSessions,
-  files,
-  dataDeletionRequests,
-  userSiteRoles,
-} from '../../db/schema.js';
+import { dataDeletionRequests } from '../../db/schema.js';
 import { deletionQueue, exportsQueue } from '../../jobs/queues.js';
-import { NotFoundError } from '../../lib/errors.js';
+import { buildPopiaExportPackage, planUserDeletion } from '../../lib/popia-export.js';
 
 export type PopiaOpts = { env: Env; db: Db };
 
-/**
- * POPIA helpers: consent already under auth; export + right-to-be-forgotten here.
- */
-export function planUserDeletion(userId: string) {
-  return {
-    userId,
-    steps: [
-      'anonymize_access_logs',
-      'soft_delete_bookings',
-      'soft_delete_invoices',
-      'soft_delete_tickets',
-      'soft_delete_ev_sessions',
-      'soft_delete_files',
-      'withdraw_consents',
-      'remove_site_roles',
-      'soft_delete_user',
-    ],
-  };
-}
+/** Re-export for existing unit tests / worker imports. */
+export { planUserDeletion } from '../../lib/popia-export.js';
 
 const popiaRoutes: FastifyPluginAsync<PopiaOpts> = async (app, opts) => {
   const { env, db } = opts;
@@ -48,22 +19,13 @@ const popiaRoutes: FastifyPluginAsync<PopiaOpts> = async (app, opts) => {
     preHandler: [app.authenticate],
   }, async (req) => {
     const userId = req.authUser!.id;
-    const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-    if (!user) throw new NotFoundError('User not found');
+    const payload = await buildPopiaExportPackage(db, userId);
 
-    const [userConsents, logs, userBookings, userInvoices, userTickets, userEv, userFiles, roles] =
-      await Promise.all([
-        db.select().from(consents).where(eq(consents.userId, userId)),
-        db.select().from(accessLogs).where(eq(accessLogs.userId, userId)).limit(1000),
-        db.select().from(bookings).where(eq(bookings.userId, userId)),
-        db.select().from(invoices).where(eq(invoices.userId, userId)),
-        db.select().from(tickets).where(eq(tickets.assignee, userId)),
-        db.select().from(evSessions).where(eq(evSessions.userId, userId)),
-        db.select().from(files).where(eq(files.ownerId, userId)),
-        db.select().from(userSiteRoles).where(eq(userSiteRoles.userId, userId)),
-      ]);
-
-    await exportsQueue(env).add('user-export', { userId });
+    await exportsQueue(env).add(
+      'user-export',
+      { userId, siteId: req.authUser!.siteIds[0] },
+      { attempts: 3, backoff: { type: 'exponential', delay: 2000 } },
+    );
 
     await app.audit({
       actorId: userId,
@@ -73,24 +35,7 @@ const popiaRoutes: FastifyPluginAsync<PopiaOpts> = async (app, opts) => {
       correlationId: req.correlationId,
     });
 
-    return {
-      exportedAt: new Date().toISOString(),
-      user: { id: user.id, email: user.email, name: user.name, createdAt: user.createdAt },
-      consents: userConsents,
-      roles,
-      accessLogs: logs,
-      bookings: userBookings,
-      invoices: userInvoices,
-      tickets: userTickets,
-      evSessions: userEv,
-      files: userFiles.map((f) => ({
-        id: f.id,
-        filename: f.filename,
-        mime: f.mime,
-        sizeBytes: f.sizeBytes,
-        createdAt: f.createdAt,
-      })),
-    };
+    return payload;
   });
 
   app.post('/api/v1/popia/deletion-request', {

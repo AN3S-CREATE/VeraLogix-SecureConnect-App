@@ -60,3 +60,20 @@ export async function presignDownload(
 export async function deleteObject(env: Env, client: S3Client, key: string): Promise<void> {
   await client.send(new DeleteObjectCommand({ Bucket: env.MINIO_BUCKET, Key: key }));
 }
+
+export async function putObject(
+  env: Env,
+  client: S3Client,
+  key: string,
+  body: Buffer | Uint8Array | string,
+  contentType: string,
+): Promise<void> {
+  await client.send(
+    new PutObjectCommand({
+      Bucket: env.MINIO_BUCKET,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+    }),
+  );
+}

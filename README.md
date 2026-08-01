@@ -73,7 +73,7 @@ npm run dev
 ```
 
 > App UI: `http://localhost:9002` · API docs: `http://localhost:3000/docs`  
-> See [`backend/README.md`](backend/README.md), [`docs/ci.md`](docs/ci.md), and [`docs/migration-firebase.md`](docs/migration-firebase.md).
+> See [`backend/README.md`](backend/README.md), [`docs/ci.md`](docs/ci.md), [`docs/secrets.md`](docs/secrets.md), and [`docs/migration-firebase.md`](docs/migration-firebase.md).
 
 Demo login (Keycloak): `admin@veralogix.com` / `secureconnect`  
 Local API bypass: set `NEXT_PUBLIC_DEV_AUTH_BYPASS=true` and `DEV_AUTH_BYPASS=true`.

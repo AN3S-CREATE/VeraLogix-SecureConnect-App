@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "SecureConnect",
+    "slug": "veralogix-secureconnect",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": { "supportsTablet": true },
+    "android": { "adaptiveIcon": { "backgroundColor": "#373435" } }
+  }
+}

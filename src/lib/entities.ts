@@ -23,38 +23,13 @@ export type Pass = {
     unitId: string;
 };
 
-export type Booking = {
-    id: string;
-    amenityId: string;
-    slotStart: string;
-    slotEnd: string;
-    price: number;
-    status: 'confirmed' | 'cancelled';
-    userId: string;
-};
-
-export type Amenity = {
-    id: string;
-    name: string;
-    rules: string;
-    priceRuleId: string;
-    photos: string[];
-};
-
-export type Invoice = {
-    id: string;
-    userId: string;
-    amount: number;
-    due: string;
-    status: 'paid' | 'unpaid';
-    ledger: string[];
-};
-
 export type Ticket = {
     id: string;
+    siteId?: string;
     unitId: string;
     category: string;
-    desc: string;
+    /** API field name (DB column `desc`) */
+    description: string;
     media?: string[];
     status: string;
     slaDeadline: string;
@@ -62,6 +37,36 @@ export type Ticket = {
     severity?: 'critical' | 'high' | 'medium' | 'low';
     assignee?: string;
     sla?: number;
+};
+
+export type Invoice = {
+    id: string;
+    siteId?: string;
+    userId: string;
+    amount: number | string;
+    due: string;
+    status: 'paid' | 'unpaid';
+    ledger: string[];
+};
+
+export type Amenity = {
+    id: string;
+    siteId?: string;
+    name: string;
+    rules: string;
+    priceRuleId: string;
+    photos: string[];
+};
+
+export type Booking = {
+    id: string;
+    siteId?: string;
+    amenityId: string;
+    slotStart: string;
+    slotEnd: string;
+    price: number | string;
+    status: 'confirmed' | 'cancelled';
+    userId: string;
 };
 
 export type Door = {
@@ -89,20 +94,22 @@ export type Incident = {
 };
 
 export type Energy = {
+    id: string;
     siteId: string;
     ts: string;
-    kwh: number;
-    waterL: number;
+    kwh: number | string;
+    waterL: number | string;
     iaqIndex: number;
     zone: string;
 };
 
 export type EVSession = {
     id: string;
+    siteId?: string;
     bayId: string;
     userId: string;
-    kwh: number;
-    cost: number;
+    kwh: number | string;
+    cost: number | string;
     status: 'charging' | 'completed';
     startedAt: string;
     endedAt?: string;

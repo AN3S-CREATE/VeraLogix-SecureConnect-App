@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { FilePlus2, Filter, Download, ShieldAlert } from "lucide-react";
+import { FilePlus2, Filter, Download, ShieldAlert, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuthClient, useBackend, useCollection } from "@/backend";
@@ -64,6 +64,8 @@ export default function IncidentsPage() {
     );
 
     const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [copilotSummary, setCopilotSummary] = useState<string | null>(null);
+    const [copilotBusy, setCopilotBusy] = useState(false);
     const selectedIncident = displayData.find((i) => i.id === selectedId) ?? displayData[0] ?? null;
 
     useEffect(() => {
@@ -105,6 +107,26 @@ export default function IncidentsPage() {
     const handleResolve = async () => {
         if (!selectedIncident) return;
         await patchIncident(selectedIncident.id, { status: "closed" }, "Incident resolved");
+    };
+
+    const handleSummarize = async () => {
+      if (!selectedIncident) return;
+      setCopilotBusy(true);
+      try {
+        const result = await client.summarizeIncident({ incidentId: selectedIncident.id });
+        setCopilotSummary(
+          `${result.summary}\n\nUrgency: ${result.urgency} · Model: ${result.model}\nActions: ${result.recommendedActions.join("; ")}`,
+        );
+        toast({ title: "Copilot summary ready" });
+      } catch (err) {
+        toast({
+          title: "Summary failed",
+          description: err instanceof Error ? err.message : "Unable to summarize",
+          variant: "destructive",
+        });
+      } finally {
+        setCopilotBusy(false);
+      }
     };
 
     const handleCreate = async () => {
@@ -207,6 +229,21 @@ export default function IncidentsPage() {
                             <h2 className="text-xl font-bold">Playbook: {selectedIncident.id.slice(0, 8)}</h2>
                             <p className="text-muted-foreground text-sm">{selectedIncident.desc}</p>
                             <p className="text-xs text-muted-foreground mt-1">Status: {selectedIncident.status}</p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="mt-3 vx-focus"
+                              disabled={copilotBusy}
+                              onClick={() => void handleSummarize()}
+                            >
+                              <Sparkles className="mr-2 h-4 w-4" />
+                              {copilotBusy ? "Summarizing…" : "AI Summarize"}
+                            </Button>
+                            {copilotSummary ? (
+                              <pre className="mt-3 whitespace-pre-wrap rounded-md border border-white/10 bg-black/30 p-3 text-xs text-muted-foreground">
+                                {copilotSummary}
+                              </pre>
+                            ) : null}
                         </div>
 
                         <div className="space-y-4">

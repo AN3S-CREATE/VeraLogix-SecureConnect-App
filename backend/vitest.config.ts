@@ -16,6 +16,11 @@ export default defineConfig({
         'src/lib/pagination.ts',
         'src/lib/roles.ts',
         'src/lib/utils.ts',
+        'src/lib/ai-copilot.ts',
+        'src/lib/evidence.ts',
+        'src/lib/sla.ts',
+        'src/lib/popia-export.ts',
+        'src/observability/metrics.ts',
       ],
       thresholds: {
         lines: 50,

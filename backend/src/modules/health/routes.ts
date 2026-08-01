@@ -5,6 +5,7 @@ import { checkDb } from '../../db/client.js';
 import type pg from 'pg';
 import { Redis } from 'ioredis';
 import { S3Client, HeadBucketCommand } from '@aws-sdk/client-s3';
+import { renderPrometheusMetrics } from '../../observability/metrics.js';
 
 export type HealthOpts = {
   env: Env;
@@ -70,13 +71,7 @@ const healthRoutes: FastifyPluginAsync<HealthOpts> = async (app, opts) => {
   });
 
   app.get('/metrics', async (_req, reply) => {
-    reply.type('text/plain').send(
-      [
-        '# HELP secureconnect_up 1 if process is up',
-        '# TYPE secureconnect_up gauge',
-        'secureconnect_up 1',
-      ].join('\n'),
-    );
+    reply.type('text/plain; version=0.0.4; charset=utf-8').send(renderPrometheusMetrics());
   });
 };
 

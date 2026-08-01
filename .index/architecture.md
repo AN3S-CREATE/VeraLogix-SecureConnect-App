@@ -12,7 +12,7 @@ Multi-portal property security platform: Next.js frontend talks to a self-hosted
 │  Portals: /cmd /ten /tru /ven + /templates                  │
 │  src/backend: provider, hooks (useCollection, useDoc)       │
 └──────────────────────────┬──────────────────────────────────┘
-                           │ REST + WS
+                            │ REST + WS
 ┌──────────────────────────▼──────────────────────────────────┐
 │  Fastify API (port 3000) — backend/src/app.ts               │
 │  Modules: auth, domain CRUD, files, admin, popia, realtime  │
@@ -24,25 +24,38 @@ Postgres Keycloak  MinIO     Redis     BullMQ worker
 
 ## Auth flow
 
-1. User logs in via SDK → `POST /api/v1/auth/login` → Keycloak token exchange
-2. JWT validated in `backend/src/middleware/auth.ts`; app user resolved from `users` + `user_site_roles`
-3. Frontend stores tokens in `localStorage`; sets `sc_role` cookie for soft portal routing
-4. Dev path: `DEV_AUTH_BYPASS` → `POST /api/v1/auth/dev-session`
+1. Browser calls Next BFF (`POST /api/auth/login` or `/api/auth/dev-session`) → Fastify `/api/v1/auth/*`
+2. BFF sets httpOnly `sc_access` / `sc_refresh` (+ soft `sc_role` for portal middleware)
+3. Provider hydrates in-memory SDK token via `GET /api/auth/session` (no localStorage tokens)
+4. JWT validated in `backend/src/middleware/auth.ts`; app user resolved from `users` + `user_site_roles`
+5. Dev path: `DEV_AUTH_BYPASS` → sentinel `******` + `x-dev-bypass: 1`
 
 ## Data flow (wired pages)
 
 - `/cmd/access`, `/ten/keys`: `useCollection('doors'|'access-logs')` + WebSocket subscribe
 - Door unlock: `client.unlockDoor(id)` → API updates door + inserts access_log + audit
+- Trustee `/tru/{overview,financials,security,energy}`: collections → `src/lib/portal-kpis.ts`
+- `/cmd/reports`: same KPIs → `buildCmdReportPack` JSON export
+- `/ven/dashboard`: tickets + passes; access create with ticket fallback
+
+## Realtime
+
+Postgres `NOTIFY` → Redis `secureconnect:realtime` → per-instance WebSocket fanout (`backend/src/realtime/gateway.ts`).
 
 ## Deployment
 
 - Local: `docker compose -f docker/docker-compose.yml up` + `npm run dev`
 - Edge: Caddy proxies API, Keycloak, MinIO
-- Observability: optional `--profile observability` for Prometheus/Grafana
-- CI: GitHub Actions — Typecheck, Backend CI, CI Health (`docs/ci.md`)
+- Observability: `/metrics` Prometheus text; optional Compose `--profile observability` for Prometheus/Grafana
+- CI: Typecheck, Frontend Build, Backend CI, Backend Integration (Postgres+Redis services), CI Health — see `docs/ci.md`
 
 ## Not yet integrated
 
 - Genkit AI (`src/ai/genkit.ts`) — no flows in `src/ai/dev.ts`
-- Most portal pages still mock; live: `/cmd/access`, `/cmd/incidents`, `/ten/keys`, `/ten/passes`
-- See `docs/COMPREHENSIVE_REPO_ANALYSIS.md` (2026-07-24)
+- Most portal pages still mock; live pages now include `/cmd/access`, `/cmd/incidents`, `/ten/keys`, `/ten/passes`, trustee workspaces, and `/cmd/reports`
+- Full malware sandbox / watermark pipeline (heuristic scan only)
+- Production billing provider (Stripe/etc.)
+- Published App Store / Play builds (`apps/mobile` is optional scaffold)
+- Remaining mock portals: cmd concierge/integrations/pricing; ten home/wallet/onboarding; tru audit/collections/pricing; ven onboarding/safety
+- Genkit requires `GEMINI_API_KEY` for live model calls (heuristics work without)
+- See `docs/COMPREHENSIVE_REPO_ANALYSIS.md` and `docs/MODULE_STATUS.md`

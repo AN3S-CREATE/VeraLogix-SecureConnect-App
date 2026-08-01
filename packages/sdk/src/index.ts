@@ -210,6 +210,60 @@ export class SecureConnectClient {
     });
   }
 
+  summarizeIncident(input: {
+    incidentId?: string;
+    severity?: string;
+    status?: string;
+    evidence?: string[];
+    slaDeadline?: string;
+  }) {
+    return this.request<{
+      summary: string;
+      urgency: string;
+      recommendedActions: string[];
+      redactions: string[];
+      model: string;
+    }>('/api/v1/ai/incident-summary', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  triageMaintenance(input: {
+    ticketId?: string;
+    category?: string;
+    description?: string;
+    severity?: string;
+  }) {
+    return this.request<{
+      priority: string;
+      suggestedAssigneeRole: string;
+      tags: string[];
+      rationale: string;
+      model: string;
+    }>('/api/v1/ai/maintenance-triage', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  finalizeFile(id: string, sha256: string) {
+    return this.request<{ file: unknown; queuedScan: boolean }>(`/api/v1/files/${id}/finalize`, {
+      method: 'POST',
+      body: JSON.stringify({ sha256 }),
+    });
+  }
+
+  attachIncidentEvidence(incidentId: string, fileId: string, label?: string) {
+    return this.request<{ incident: unknown; file: unknown }>(
+      `/api/v1/incidents/${incidentId}/evidence`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ fileId, label }),
+      },
+    );
+  }
+
   async presignUpload(input: {
     siteId: string;
     filename: string;
