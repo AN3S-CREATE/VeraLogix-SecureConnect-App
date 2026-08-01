@@ -22,7 +22,14 @@
 | `src/app/layout.tsx` | Root layout + `BackendClientProvider` | Active |
 | `src/app/cmd/access/page.tsx` | Live doors + access logs | Active |
 | `src/app/ten/keys/page.tsx` | Live keys + access history | Active |
-| `src/app/**/page.tsx` (other) | Portal UI — mostly mock data | Active (partial) |
+| `src/app/**/page.tsx` (other) | Portal UI — ~19 live; remaining mock | Active (partial) |
+| `src/lib/portal-kpis.ts` | Shared invoice/ticket/incident/energy/EV KPIs + report pack builder | Active |
+| `src/app/tru/overview/page.tsx` | Live trustee overview KPIs | Active |
+| `src/app/tru/financials/page.tsx` | Live financials + aging | Active |
+| `src/app/tru/security/page.tsx` | Live incidents + access logs | Active |
+| `src/app/tru/energy/page.tsx` | Live energy + EV oversight | Active |
+| `src/app/ven/dashboard/page.tsx` | Live tickets/passes + access request | Active |
+| `src/app/cmd/reports/page.tsx` | Live report builder + JSON pack export | Active |
 | `src/backend/provider.tsx` | Auth session + SDK client (BFF cookies, in-memory token) | Active |
 | `src/backend/hooks.ts` | `useCollection`, `useDoc` | Active |
 | `src/middleware.ts` | Soft portal RBAC via cookie | Active |
@@ -71,6 +78,10 @@
 | `.github/workflows/frontend-build.yml` | Production `next build` gate | Active |
 | `docs/ci.md` | Local CI parity + troubleshooting | Active |
 | `docs/phase2/README.md` | Phase 2 delivery notes | Active |
+| `docs/phase4/README.md` | Phase 4 delivery notes | Active |
+| `docs/phase5/README.md` | Phase 5 trustee + reports notes | Active |
+| `docs/MODULE_STATUS.md` | Headline module status | Active |
+| `backend/tests/unit/phase5-contract.test.ts` | Phase 5 wiring contracts | Active |
 | `docs/secrets.md` | Secret rotation + local env hygiene | Active |
 | `docs/branch-protection-checklist.md` | Admin steps for required checks | Active |
 | `docs/ci-failure-diagnosis.md` | 2026-07-21 failure diagnosis | Active |
