@@ -1,4 +1,9 @@
+import { config } from 'dotenv';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { buildApp } from './app.js';
+
+config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../.env') });
 
 async function main() {
   const { app, env, logger } = await buildApp();

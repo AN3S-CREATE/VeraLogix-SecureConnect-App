@@ -1,0 +1,145 @@
+# Backend integration + e2e
+# Boots Postgres + Redis service containers, migrates/seeds, starts the API with
+# DEV_AUTH_BYPASS, then runs Vitest integration + e2e suites.
+# No Keycloak/MinIO required for the smoke path (dummy env vars satisfy Zod).
+
+name: Backend Integration
+
+on:
+  push:
+    paths:
+      - 'backend/**'
+      - 'packages/sdk/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/backend-integration.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'packages/sdk/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/backend-integration.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: backend-integration-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: Backend integration + e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: secureconnect
+          POSTGRES_PASSWORD: secureconnect
+          POSTGRES_DB: secureconnect
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U secureconnect -d secureconnect"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      NODE_ENV: development
+      PORT: '3000'
+      HOST: 0.0.0.0
+      LOG_LEVEL: warn
+      DATABASE_URL: postgresql://secureconnect:secureconnect@localhost:5432/secureconnect
+      REDIS_URL: redis://localhost:6379
+      KEYCLOAK_URL: http://localhost:8080
+      KEYCLOAK_REALM: secureconnect
+      KEYCLOAK_CLIENT_ID: secureconnect-api
+      KEYCLOAK_CLIENT_SECRET: ci-dummy-secret
+      KEYCLOAK_WEB_CLIENT_ID: secureconnect-web
+      MINIO_ENDPOINT: localhost
+      MINIO_PORT: '9000'
+      MINIO_USE_SSL: 'false'
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_BUCKET: secureconnect
+      CORS_ORIGINS: http://localhost:9002,http://localhost:3000
+      DEV_AUTH_BYPASS: 'true'
+      DEV_BYPASS_EMAIL: admin@veralogix.com
+      DEV_BYPASS_ROLES: admin,agent
+      API_URL: http://localhost:3000
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Migrate database
+        run: npm run db:migrate --workspace=@veralogix/secureconnect-api
+
+      - name: Seed demo data
+        run: npm run db:seed --workspace=@veralogix/secureconnect-api
+
+      - name: Start API
+        run: |
+          set -euo pipefail
+          npm run dev --workspace=@veralogix/secureconnect-api > /tmp/secureconnect-api.log 2>&1 &
+          echo $! > /tmp/secureconnect-api.pid
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3000/health/live >/dev/null; then
+              echo "API ready after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::API failed to become ready"
+          cat /tmp/secureconnect-api.log || true
+          exit 1
+
+      - name: Integration tests
+        run: RUN_INTEGRATION=1 npm run test:integration --workspace=@veralogix/secureconnect-api
+
+      - name: E2E smoke tests
+        run: RUN_E2E=1 npm run test:e2e --workspace=@veralogix/secureconnect-api
+
+      - name: Assert metrics endpoint
+        run: |
+          set -euo pipefail
+          curl -sf http://localhost:3000/metrics | tee /tmp/metrics.txt
+          grep -q 'secureconnect_up 1' /tmp/metrics.txt
+          grep -q 'secureconnect_http_requests_total' /tmp/metrics.txt
+
+      - name: Stop API
+        if: always()
+        run: |
+          if [ -f /tmp/secureconnect-api.pid ]; then
+            kill "$(cat /tmp/secureconnect-api.pid)" || true
+          fi
+          echo "## Backend Integration" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Postgres + Redis service containers" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Migrate + seed + DEV_AUTH_BYPASS API" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Integration + e2e Vitest suites" >> "$GITHUB_STEP_SUMMARY"
+          echo "- /metrics smoke assertion" >> "$GITHUB_STEP_SUMMARY"

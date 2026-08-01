@@ -104,7 +104,9 @@ services:
       context: ../backend
       dockerfile: Dockerfile
     environment:
-      NODE_ENV: production
+      # Local Compose uses development so DEV_AUTH_BYPASS is allowed by the API.
+      # Production overlays MUST set NODE_ENV=production and DEV_AUTH_BYPASS=false.
+      NODE_ENV: development
       PORT: 3000
       HOST: 0.0.0.0
       LOG_LEVEL: info
@@ -152,7 +154,7 @@ services:
       dockerfile: Dockerfile
     command: ["node", "dist/worker.js"]
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       LOG_LEVEL: info
       DATABASE_URL: postgresql://secureconnect:secureconnect@postgres:5432/secureconnect
       REDIS_URL: redis://redis:6379

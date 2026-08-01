@@ -1,5 +1,6 @@
+import { config } from 'dotenv';
 import { readFileSync, readdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 import { loadEnv } from '../config/env.js';
@@ -7,6 +8,7 @@ import { createLogger } from '../config/logger.js';
 import { REALTIME_NOTIFY_SQL } from './schema.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+config({ path: resolve(__dirname, '../../.env') });
 
 async function migrate() {
   const env = loadEnv();
