@@ -12,3 +12,4 @@
 | 2026-07-27 | Phase 4 portal + export | Energy/EV/work-orders live; POPIA export worker archives JSON. |
 | 2026-07-29 | Phase 5 trustee wiring | Trustee×4, ven dashboard, cmd reports live; portal-kpis + Phase 5 contracts. |
 | 2026-08-01 | Merge latest `main` into analysis branch | Reconciled the 2026-07-24 analysis baseline with Phases 1–5; refreshed architecture, inventory, and repository analysis memory. |
+| 2026-09-10 | Post-merge validation | Frontend/SDK typechecks, production build, and all 40 backend unit tests passed after fixing locale-dependent Phase 5 currency formatting. |
