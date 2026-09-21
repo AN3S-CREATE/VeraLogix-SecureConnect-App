@@ -2,7 +2,7 @@
 
 ## Current Analysis Phase & Progress
 
-Phase 5 post-merge validation complete: the repository includes the analysis report plus phases 1–5 from `main`. Frontend/SDK typechecks, the production build, and all 40 backend unit tests pass after fixing a locale-dependent Phase 5 report-format contract.
+Phase 5 post-merge validation complete; GitHub Copilot app repository configuration is now set up with lifecycle, run, validation, and server-detection settings.
 
 ## Key Architectural Insights Discovered
 
@@ -49,3 +49,4 @@ Phase 5 post-merge validation complete: the repository includes the analysis rep
 - 2026-07-27/29 — Phase 1–5 feature work merged into `main`
 - 2026-08-01 — Merged latest `main` into this branch and resolved docs/index conflicts
 - 2026-09-10 — Post-merge validation complete: frontend/SDK typechecks, production build, and 40 backend unit tests pass after fixing locale-dependent Phase 5 report summary formatting.
+- 2026-09-20 — Configured `.github/github-app.yml` and refreshed the project context index.

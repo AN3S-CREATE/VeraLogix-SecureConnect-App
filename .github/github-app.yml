@@ -1,0 +1,27 @@
+instructions: |
+  This repository is a Next.js frontend with a Fastify backend and npm workspaces.
+  Use npm rather than bun or yarn. Keep frontend changes under src/, backend changes
+  under backend/, and SDK changes under packages/sdk/.
+  Before completing code changes, run the smallest relevant typecheck or test command.
+  Do not commit or expose .env files, credentials, or generated build output.
+
+scripts:
+  - name: Setup dependencies
+    command: npm ci
+    triggers:
+      - session.create
+  - name: Start frontend
+    command: npm run dev
+  - name: Start backend API
+    command: npm run dev:api
+  - name: Validate frontend and SDK
+    command: npm run typecheck
+  - name: Validate backend
+    command: npm run typecheck:api && npm run test:api
+
+server_ready_pattern: '(?i)(https?://localhost:\d+)'
+auto_open_in_browser: true
+
+automation:
+  auto_issue_session: true
+  remote_control: false

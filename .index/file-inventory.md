@@ -71,6 +71,7 @@
 
 | Path | Purpose | Status |
 |------|---------|--------|
+| `.github/github-app.yml` | GitHub Copilot app instructions, lifecycle setup, run commands, and server detection | Active |
 | `.github/workflows/backend-ci.yml` | Backend typecheck, unit tests, coverage | Active |
 | `.github/workflows/backend-integration.yml` | Postgres+Redis integration/e2e | Active |
 | `.github/workflows/typecheck.yml` | Frontend + SDK typecheck | Active |

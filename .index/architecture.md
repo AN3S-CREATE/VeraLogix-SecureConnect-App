@@ -45,6 +45,7 @@ Postgres `NOTIFY` → Redis `secureconnect:realtime` → per-instance WebSocket 
 ## Deployment
 
 - Local: `docker compose -f docker/docker-compose.yml up` + `npm run dev`
+- GitHub Copilot app: `.github/github-app.yml` installs dependencies on session creation and exposes frontend/backend run and validation commands.
 - Edge: Caddy proxies API, Keycloak, MinIO
 - Observability: `/metrics` Prometheus text; optional Compose `--profile observability` for Prometheus/Grafana
 - CI: Typecheck, Frontend Build, Backend CI, Backend Integration (Postgres+Redis services), CI Health — see `docs/ci.md`
